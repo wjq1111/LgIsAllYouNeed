@@ -1,12 +1,37 @@
 {
   "Version": 1,
   "WorkspaceRootPath": "C:\\Users\\Wenchang Gao\\Desktop\\LgIsAllYouNeed\\",
-  "Documents": [],
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{52172BD9-1B17-7B5C-D82A-667ACB1FF7DE}|Assembly-CSharp.csproj|c:\\users\\wenchang gao\\desktop\\lgisallyouneed\\assets\\scripts\\canvasbehavior.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{52172BD9-1B17-7B5C-D82A-667ACB1FF7DE}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\canvasbehavior.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
   "DocumentGroupContainers": [
     {
       "Orientation": 0,
       "VerticalTabListWidth": 256,
-      "DocumentGroups": []
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 0,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "CanvasBehavior.cs",
+              "DocumentMoniker": "C:\\Users\\Wenchang Gao\\Desktop\\LgIsAllYouNeed\\Assets\\Scripts\\CanvasBehavior.cs",
+              "RelativeDocumentMoniker": "Assets\\Scripts\\CanvasBehavior.cs",
+              "ToolTip": "C:\\Users\\Wenchang Gao\\Desktop\\LgIsAllYouNeed\\Assets\\Scripts\\CanvasBehavior.cs",
+              "RelativeToolTip": "Assets\\Scripts\\CanvasBehavior.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABQAAABIAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-05-20T16:01:24.343Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
     }
   ]
 }

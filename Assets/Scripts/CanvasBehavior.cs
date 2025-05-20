@@ -4,6 +4,7 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using UnityEditor.Experimental.GraphView;
 
 public class CanvasBehavior : MonoBehaviour
 {
@@ -18,6 +19,9 @@ public class CanvasBehavior : MonoBehaviour
         //StartText.text = "LG Start Game";
         StartButton1.GetComponentInChildren<TMP_Text>().text = "Here LG comes";
         EndButton1.GetComponentInChildren<TMP_Text>().text = "There LG goes";
+
+        StartButton1.gameObject.SetActive(true);
+        EndButton1.gameObject.SetActive(true);
         //var ButtonText = StartButton1.GetComponentsInChildren<Text>();
     }
 
@@ -25,5 +29,15 @@ public class CanvasBehavior : MonoBehaviour
     void Update()
     {
 
+    }
+
+    public void OnChoiceSelected(int ChoiceIndex)
+    {
+        if (ChoiceIndex == 0) Debug.LogFormat("LG Comes!!!");
+        else if (ChoiceIndex == 1) Debug.LogFormat("LG Goes!!!");
+        else Debug.LogFormat("Unknown Selection!!!!!!!!!!!!!!");
+
+        StartButton1.gameObject.SetActive(false);
+        EndButton1.gameObject.SetActive(false);
     }
 }
