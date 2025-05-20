@@ -1,0 +1,51 @@
+# Unity specific files
+[Tt]emp/
+[Tt]emp/
+[Dd]ebug/
+[Dd]ebugPublic/
+[Dd]ist/
+[Ll]ibrary/
+[Ll]ogs/
+[Oo]bj/
+[Bb]uild/
+[Bb]uilds/
+[Mm]emoryCaptures/
+
+# User-specific files
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Unity Auto-generated files
+sysinfo.txt
+*.swp
+
+# Uncomment if you have the 'Exported' folder
+# Exported/
+
+# Visual Studio for Mac
+.vscode/
+
+# Windows Installer Files
+*.cab
+*.msi
+*.msm
+*.msp
+
+# Windows Installer Files
+*.cab
+*.msi
+*.msm
+*.msp
+
+# JetBrains Rider
+.idea/
+
+# User-specific preferences
+*.user
+*.userprefs
+*.pidb
+*.suo
+*.user
+
