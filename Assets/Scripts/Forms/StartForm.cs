@@ -6,7 +6,7 @@ using UnityEngine.UI;
 using TMPro;
 using UnityEditor.Experimental.GraphView;
 
-public class CanvasBehavior : MonoBehaviour
+public class StartForm : MonoSingleton<StartForm>
 {
     public Button StartButton1;
     public Button EndButton1;
