@@ -13,6 +13,5 @@ public class GameMgr : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        Debug.LogFormat("111");
     }
 }

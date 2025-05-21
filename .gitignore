@@ -14,6 +14,7 @@
 # User-specific files
 .idea/
 .vscode/
+.vs/
 .DS_Store
 Thumbs.db
 
