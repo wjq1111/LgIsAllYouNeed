@@ -1,6 +1,9 @@
-public enum GameplayStatus
+using System.ComponentModel;
+
+public enum GameplayStatusType
 {
     GameplayStatus_Invalid = 0,
+    GameplayStatus_WaitStart,
     GameplayStatus_RoundStart,
     GameplayStatus_Rounding,
     GameplayStatus_RoundEnd,
@@ -11,6 +14,15 @@ public enum GameplayEventType
     GameplayEventType_Invalid = 0,
     GameplayEventType_StartGame,
     GameplayEventType_DrawCard,
+    GameplayEventType_CloseGame,
+    GameplayEventType_Timeout,
+}
+
+public enum GameplayEventResult
+{
+    GameplayEventResult_Invalid = 0,
+    GameplayEventResult_NoNeedSwitch,
+    GameplayEventResult_NeedSwitch,
 }
 
 public class GameplayEvent

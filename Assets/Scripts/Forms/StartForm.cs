@@ -1,15 +1,18 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using Unity.VisualScripting;
+using UnityEditor.Experimental.GraphView;
+using UnityEditor.MPE;
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro;
-using UnityEditor.Experimental.GraphView;
 
 public class StartForm : MonoSingleton<StartForm>
 {
     public Button StartButton1;
     public Button EndButton1;
+
+    public GameObject BattleField;
     
     // Start is called before the first frame update
     void Start()
@@ -33,9 +36,21 @@ public class StartForm : MonoSingleton<StartForm>
 
     public void OnChoiceSelected(int ChoiceIndex)
     {
-        if (ChoiceIndex == 0) Debug.LogFormat("LG Comes!!!");
-        else if (ChoiceIndex == 1) Debug.LogFormat("LG Goes!!!");
-        else Debug.LogFormat("Unknown Selection!!!!!!!!!!!!!!");
+        BattleFieldBehaviour BattleFieldBehaviour = (BattleFieldBehaviour)BattleField.GetComponent<BattleFieldBehaviour>();
+        BattleFieldBehaviour.GameplayFsm.ProcessEvent(BattleFieldBehaviour.GameplayContext, GameplayEventType.GameplayEventType_StartGame);
+
+        if (ChoiceIndex == 0)
+        {
+            Debug.LogFormat("LG Comes!!!");
+        }
+        else if (ChoiceIndex == 1)
+        {
+            Debug.LogFormat("LG Goes!!!");
+        }
+        else
+        {
+            Debug.LogFormat("Unknown Selection!!!!!!!!!!!!!!");
+        }
 
         StartButton1.gameObject.SetActive(false);
         EndButton1.gameObject.SetActive(false);

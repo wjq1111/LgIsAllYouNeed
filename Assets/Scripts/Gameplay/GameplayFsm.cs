@@ -2,38 +2,145 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class GameplayTransition
-{
-    private GameplayStatus gpStatus = GameplayStatus.GameplayStatus_Invalid;
-    private GameplayEventType gpEventType;
-
-    public GameplayStatus GpStatus { get => gpStatus; set => gpStatus = value; }
-    public GameplayEventType GpEventType { get => gpEventType; set => gpEventType = value; }
-}
-
-
 public class GameplayFsm
 {
     // 状态转换图
-    private Dictionary<GameplayTransition, GameplayStatus> transitionMap;
+    private Dictionary<GameplayStatusType, Dictionary<GameplayEventType, GameplayStatusType>> transitionMap = new Dictionary<GameplayStatusType, Dictionary<GameplayEventType, GameplayStatusType>>();
     // action列表
-    private Dictionary<GameplayStatus, GameplayAction> actionMap;
+    private Dictionary<GameplayStatusType, GameplayAction> actionMap = new Dictionary<GameplayStatusType, GameplayAction>();
 
-    public Dictionary<GameplayTransition, GameplayStatus> TransitionMap { get => transitionMap; set => transitionMap = value; }
-    public Dictionary<GameplayStatus, GameplayAction> ActionMap { get => actionMap; set => actionMap = value; }
+    public Dictionary<GameplayStatusType, Dictionary<GameplayEventType, GameplayStatusType>> TransitionMap { get => transitionMap; set => transitionMap = value; }
+    public Dictionary<GameplayStatusType, GameplayAction> ActionMap { get => actionMap; set => actionMap = value; }
 
     // 初始化函数
-    public void Init()
+    public void Init(GameplayContext Context)
     {
-        RegisterTransition(GameplayStatus.GameplayStatus_Invalid, GameplayEventType.GameplayEventType_StartGame, GameplayStatus.GameplayStatus_RoundStart);
+        // 注册状态转换图
+        RegisterTransition(GameplayStatusType.GameplayStatus_WaitStart, GameplayEventType.GameplayEventType_StartGame, GameplayStatusType.GameplayStatus_RoundStart);
+
+
+        // 注册action列表
+        RegisterAction(GameplayStatusType.GameplayStatus_WaitStart);
+        RegisterAction(GameplayStatusType.GameplayStatus_RoundStart);
+
+        // 处理第一个状态
+        GameplayAction GpCurAction = GetAction(Context, Context.CurStatusType);
+        GpCurAction.OnEnter(Context);
     }
 
-    private void RegisterTransition(GameplayStatus GpStatus, GameplayEventType GpEventType, GameplayStatus GpNewStatus)
+    private void RegisterTransition(GameplayStatusType GpStatusType, GameplayEventType GpEventType, GameplayStatusType GpNewStatus)
     {
-        GameplayTransition GpTransition = new GameplayTransition();
-        GpTransition.GpStatus = GpStatus;
-        GpTransition.GpEventType = GpEventType;
-        TransitionMap.Add(GpTransition, GpNewStatus);
+        if (transitionMap.ContainsKey(GpStatusType) == false)
+        {
+            Dictionary<GameplayEventType, GameplayStatusType> Pairs = new Dictionary<GameplayEventType, GameplayStatusType>();
+            Pairs.Add(GpEventType, GpNewStatus);
+            transitionMap.Add(GpStatusType, Pairs);
+        }
+        if (transitionMap[GpStatusType].ContainsKey(GpEventType) == false)
+        {
+            TransitionMap[GpStatusType].Add(GpEventType, GpNewStatus);
+        }
     }
 
+    private void RegisterAction(GameplayStatusType GpStatusType)
+    {
+        actionMap.Add(GpStatusType, GameplayActionMgr.Instance.GetAction(GpStatusType));
+    }
+
+    // 获取当前状态
+    public GameplayStatus GetCurStatus(GameplayContext Context)
+    {
+        return Context.GetStatus(Context.CurStatusType);
+    }
+
+    // 获取action
+    public GameplayAction GetAction(GameplayContext Context, GameplayStatusType GpStatusType)
+    {
+        if (actionMap.ContainsKey(GpStatusType) == false)
+        {
+            Debug.LogError("action map not contains status:" + GpStatusType);
+            return null;
+        }
+        return actionMap[GpStatusType];
+    }
+
+    // 获取下一个状态
+    public GameplayStatusType GetNextStatus(GameplayContext Context, GameplayStatusType GpStatusType, GameplayEventType GpEventType)
+    {
+        if (transitionMap.ContainsKey(GpStatusType) == false)
+        {
+            Debug.LogError("transition map not contains transition:" + GpStatusType + " " + GpEventType);
+            return GameplayStatusType.GameplayStatus_Invalid;
+        }
+        if (transitionMap[GpStatusType].ContainsKey(GpEventType) == false)
+        {
+            Debug.LogError("transition map not contains transition:" + GpStatusType + " " + GpEventType);
+            return GameplayStatusType.GameplayStatus_Invalid;
+        }
+        return transitionMap[GpStatusType][GpEventType];
+    }
+
+    // update
+    public int Update(GameplayContext Context)
+    {
+        GameplayStatus GpCurStatus = GetCurStatus(Context);
+        if (GpCurStatus.GpType == GameplayStatusType.GameplayStatus_Invalid)
+        {
+            Debug.LogError("wrong type");
+            return -1;
+        }
+        GameplayAction GpCurAction = GetAction(Context, GpCurStatus.GpType);
+        return GpCurAction.OnUpdate(Context);
+    }
+
+    public int ProcessEvent(GameplayContext Context, GameplayEventType GpEventType)
+    {
+        GameplayEvent GpNewEvent = new GameplayEvent();
+        GpNewEvent.Type = GpEventType;
+        return ProcessEvent(Context, GpNewEvent);
+    }
+
+    // 处理事件
+    public int ProcessEvent(GameplayContext Context, GameplayEvent GpEvent)
+    {
+        int Ret = ExecuteEvent(Context, GpEvent);
+        if (Ret != 0)
+        {
+            GameplayStatus GpCurStatus = GetCurStatus(Context);
+            GameplayAction GpCurAction = GetAction(Context, GpCurStatus.GpType);
+            return GpCurAction.OnError(Context);
+        }
+        return 0;
+    }
+
+    // 执行事件
+    public int ExecuteEvent(GameplayContext Context, GameplayEvent GpEvent)
+    {
+        GameplayStatus GpCurStatus = GetCurStatus(Context);
+        GameplayAction GpCurAction = GetAction(Context, GpCurStatus.GpType);
+
+        GameplayEventResult GpEventResult = GpCurAction.OnEvent(Context, GpEvent);
+        if (GpEventResult == GameplayEventResult.GameplayEventResult_NoNeedSwitch)
+        {
+            return 0;
+        }
+
+        int Ret = GpCurAction.OnExit(Context, GpEvent);
+        if (Ret != 0)
+        {
+            ProcessEvent(Context, GameplayEventType.GameplayEventType_CloseGame);
+            return -1;
+        }
+
+        GameplayStatusType GpNextStatusType = GetNextStatus(Context, GpCurStatus.GpType, GpEvent.Type);
+        if (GpNextStatusType == GameplayStatusType.GameplayStatus_Invalid)
+        {
+            ProcessEvent(Context, GameplayEventType.GameplayEventType_CloseGame);
+            return -1;
+        }
+        
+        Context.CurStatusType = GpNextStatusType;
+        GameplayAction GpNextAction = GetAction(Context, GpNextStatusType);
+        return GpNextAction.OnEnter(Context);
+    }
 }

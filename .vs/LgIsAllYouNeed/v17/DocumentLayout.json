@@ -1,12 +1,157 @@
 {
   "Version": 1,
   "WorkspaceRootPath": "C:\\Users\\pc\\LgIsAllYouNeed\\",
-  "Documents": [],
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{52172BD9-1B17-7B5C-D82A-667ACB1FF7DE}|Assembly-CSharp.csproj|c:\\users\\pc\\lgisallyouneed\\assets\\scripts\\forms\\startform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{52172BD9-1B17-7B5C-D82A-667ACB1FF7DE}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\forms\\startform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{52172BD9-1B17-7B5C-D82A-667ACB1FF7DE}|Assembly-CSharp.csproj|c:\\users\\pc\\lgisallyouneed\\assets\\scripts\\gameplay\\gameplayfsm.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{52172BD9-1B17-7B5C-D82A-667ACB1FF7DE}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\gameplay\\gameplayfsm.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{52172BD9-1B17-7B5C-D82A-667ACB1FF7DE}|Assembly-CSharp.csproj|c:\\users\\pc\\lgisallyouneed\\assets\\scripts\\gameplay\\gameplaydefines.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{52172BD9-1B17-7B5C-D82A-667ACB1FF7DE}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\gameplay\\gameplaydefines.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{52172BD9-1B17-7B5C-D82A-667ACB1FF7DE}|Assembly-CSharp.csproj|c:\\users\\pc\\lgisallyouneed\\assets\\scripts\\gameplay\\gameplayaction.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{52172BD9-1B17-7B5C-D82A-667ACB1FF7DE}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\gameplay\\gameplayaction.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{52172BD9-1B17-7B5C-D82A-667ACB1FF7DE}|Assembly-CSharp.csproj|c:\\users\\pc\\lgisallyouneed\\assets\\scripts\\gameplay\\gameplaycontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{52172BD9-1B17-7B5C-D82A-667ACB1FF7DE}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\gameplay\\gameplaycontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{52172BD9-1B17-7B5C-D82A-667ACB1FF7DE}|Assembly-CSharp.csproj|c:\\users\\pc\\lgisallyouneed\\assets\\scripts\\gameplay\\gameplaystatus.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{52172BD9-1B17-7B5C-D82A-667ACB1FF7DE}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\gameplay\\gameplaystatus.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{52172BD9-1B17-7B5C-D82A-667ACB1FF7DE}|Assembly-CSharp.csproj|c:\\users\\pc\\lgisallyouneed\\assets\\scripts\\gameplay\\battlefield.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{52172BD9-1B17-7B5C-D82A-667ACB1FF7DE}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\gameplay\\battlefield.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{52172BD9-1B17-7B5C-D82A-667ACB1FF7DE}|Assembly-CSharp.csproj|c:\\users\\pc\\lgisallyouneed\\assets\\scripts\\gameframework.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{52172BD9-1B17-7B5C-D82A-667ACB1FF7DE}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\gameframework.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
   "DocumentGroupContainers": [
     {
       "Orientation": 0,
       "VerticalTabListWidth": 256,
-      "DocumentGroups": []
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 0,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "StartForm.cs",
+              "DocumentMoniker": "C:\\Users\\pc\\LgIsAllYouNeed\\Assets\\Scripts\\Forms\\StartForm.cs",
+              "RelativeDocumentMoniker": "Assets\\Scripts\\Forms\\StartForm.cs",
+              "ToolTip": "C:\\Users\\pc\\LgIsAllYouNeed\\Assets\\Scripts\\Forms\\StartForm.cs",
+              "RelativeToolTip": "Assets\\Scripts\\Forms\\StartForm.cs",
+              "ViewState": "AgIAABkAAAAAAAAAAAAewCwAAAAJAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-05-21T12:59:39.391Z",
+              "IsPinned": true,
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "GameplayContext.cs",
+              "DocumentMoniker": "C:\\Users\\pc\\LgIsAllYouNeed\\Assets\\Scripts\\Gameplay\\GameplayContext.cs",
+              "RelativeDocumentMoniker": "Assets\\Scripts\\Gameplay\\GameplayContext.cs",
+              "ToolTip": "C:\\Users\\pc\\LgIsAllYouNeed\\Assets\\Scripts\\Gameplay\\GameplayContext.cs",
+              "RelativeToolTip": "Assets\\Scripts\\Gameplay\\GameplayContext.cs",
+              "ViewState": "AgIAAAMAAAAAAAAAAAAuwBkAAAAIAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-05-21T13:15:56.61Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "GameplayStatus.cs",
+              "DocumentMoniker": "C:\\Users\\pc\\LgIsAllYouNeed\\Assets\\Scripts\\Gameplay\\GameplayStatus.cs",
+              "RelativeDocumentMoniker": "Assets\\Scripts\\Gameplay\\GameplayStatus.cs",
+              "ToolTip": "C:\\Users\\pc\\LgIsAllYouNeed\\Assets\\Scripts\\Gameplay\\GameplayStatus.cs",
+              "RelativeToolTip": "Assets\\Scripts\\Gameplay\\GameplayStatus.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAuwAsAAAALAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-05-21T12:59:19.393Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "GameplayAction.cs",
+              "DocumentMoniker": "C:\\Users\\pc\\LgIsAllYouNeed\\Assets\\Scripts\\Gameplay\\GameplayAction.cs",
+              "RelativeDocumentMoniker": "Assets\\Scripts\\Gameplay\\GameplayAction.cs",
+              "ToolTip": "C:\\Users\\pc\\LgIsAllYouNeed\\Assets\\Scripts\\Gameplay\\GameplayAction.cs",
+              "RelativeToolTip": "Assets\\Scripts\\Gameplay\\GameplayAction.cs",
+              "ViewState": "AgIAAD4AAAAAAAAAAAAawE4AAAAeAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-05-21T12:56:56.577Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "GameplayFsm.cs",
+              "DocumentMoniker": "C:\\Users\\pc\\LgIsAllYouNeed\\Assets\\Scripts\\Gameplay\\GameplayFsm.cs",
+              "RelativeDocumentMoniker": "Assets\\Scripts\\Gameplay\\GameplayFsm.cs",
+              "ToolTip": "C:\\Users\\pc\\LgIsAllYouNeed\\Assets\\Scripts\\Gameplay\\GameplayFsm.cs",
+              "RelativeToolTip": "Assets\\Scripts\\Gameplay\\GameplayFsm.cs",
+              "ViewState": "AgIAAAQAAAAAAAAAAAAtwBQAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-05-21T12:54:24.874Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "GameFramework.cs",
+              "DocumentMoniker": "C:\\Users\\pc\\LgIsAllYouNeed\\Assets\\Scripts\\GameFramework.cs",
+              "RelativeDocumentMoniker": "Assets\\Scripts\\GameFramework.cs",
+              "ToolTip": "C:\\Users\\pc\\LgIsAllYouNeed\\Assets\\Scripts\\GameFramework.cs",
+              "RelativeToolTip": "Assets\\Scripts\\GameFramework.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABQAAAAFAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-05-21T12:53:49.577Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "GameplayDefines.cs",
+              "DocumentMoniker": "C:\\Users\\pc\\LgIsAllYouNeed\\Assets\\Scripts\\Gameplay\\GameplayDefines.cs",
+              "RelativeDocumentMoniker": "Assets\\Scripts\\Gameplay\\GameplayDefines.cs",
+              "ToolTip": "C:\\Users\\pc\\LgIsAllYouNeed\\Assets\\Scripts\\Gameplay\\GameplayDefines.cs",
+              "RelativeToolTip": "Assets\\Scripts\\Gameplay\\GameplayDefines.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAuwBEAAAAdAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-05-21T12:53:30.474Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "BattleField.cs",
+              "DocumentMoniker": "C:\\Users\\pc\\LgIsAllYouNeed\\Assets\\Scripts\\Gameplay\\BattleField.cs",
+              "RelativeDocumentMoniker": "Assets\\Scripts\\Gameplay\\BattleField.cs",
+              "ToolTip": "C:\\Users\\pc\\LgIsAllYouNeed\\Assets\\Scripts\\Gameplay\\BattleField.cs",
+              "RelativeToolTip": "Assets\\Scripts\\Gameplay\\BattleField.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABYAAAARAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-05-21T12:51:13.246Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
     }
   ]
 }
