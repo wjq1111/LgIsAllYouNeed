@@ -23,8 +23,8 @@ public class StartForm : MonoSingleton<StartForm>
         StartButton1.GetComponentInChildren<TMP_Text>().text = "Here LG comes";
         EndButton1.GetComponentInChildren<TMP_Text>().text = "There LG goes";
 
-        StartButton1.gameObject.SetActive(true);
-        EndButton1.gameObject.SetActive(true);
+        StartButton1.gameObject.SetActive(false);
+        EndButton1.gameObject.SetActive(false);
         //var ButtonText = StartButton1.GetComponentsInChildren<Text>();
     }
 
