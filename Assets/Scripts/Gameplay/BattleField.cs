@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class BattleFieldBehaviour : MonoSingleton<BattleFieldBehaviour>
 {
@@ -17,6 +18,16 @@ public class BattleFieldBehaviour : MonoSingleton<BattleFieldBehaviour>
         GameplayContext.CurStatusType = GameplayStatusType.GameplayStatus_WaitStart;
 
         GameplayFsm.Init(GameplayContext);
+
+        GenerateMap();
+    }
+
+    // Generate the actual Hex-style map
+    void GenerateMap()
+    {
+        GameObject Prefab = (GameObject)Resources.Load("Prefabs/BattlefieldTile");
+        Prefab = Instantiate(Prefab);
+        Prefab.transform.SetParent(this.transform, false);
     }
 
     // Update is called once per frame

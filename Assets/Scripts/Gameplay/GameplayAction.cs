@@ -43,7 +43,7 @@ public class WaitStartAction : GameplayAction
         base.OnEnter(Context);
         GameplayStatus GpCurStatus = GetCurStatus(Context);
         GpCurStatus.StartTime = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds();
-        GpCurStatus.TimeoutTime = GpCurStatus.StartTime + 10;
+        GpCurStatus.TimeoutTime = GpCurStatus.StartTime + 100;
         return 0;
     }
 
