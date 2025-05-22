@@ -9,11 +9,17 @@ public class GameplayContext
     private GameplayStatus roundingStatus = new GameplayStatus();
     private GameplayStatus roundEndStatus = new GameplayStatus();
 
+    private GameplayFsm gpFsm = new GameplayFsm();
+
+    private List<Player> players = new List<Player>();
+
     private Dictionary<GameplayStatusType, GameplayStatus> gpStatusMap = new Dictionary<GameplayStatusType, GameplayStatus>();
 
     private GameplayStatusType curStatusType = GameplayStatusType.GameplayStatus_Invalid;
 
     public GameplayStatusType CurStatusType { get => curStatusType; set => curStatusType = value; }
+    public List<Player> Players { get => players; set => players = value; }
+    public GameplayFsm GpFsm { get => gpFsm; set => gpFsm = value; }
 
     public void Init()
     {
@@ -26,6 +32,14 @@ public class GameplayContext
         gpStatusMap.Add(roundStartStatus.GpType, roundStartStatus);
         gpStatusMap.Add(roundingStatus.GpType, roundingStatus);
         gpStatusMap.Add(roundEndStatus.GpType, roundEndStatus);
+
+        // 只有两个玩家
+        for (int i = 0; i < 2; i++)
+        {
+            Player MyPlayer = new Player();
+            MyPlayer.InitPlayer();
+            Players.Add(MyPlayer);
+        }
     }
 
     public GameplayStatus GetStatus(GameplayStatusType GpStatus)

@@ -13,6 +13,7 @@ public class StartForm : MonoSingleton<StartForm>
     public Button EndButton1;
 
     public GameObject BattleField;
+    public GameObject CardSession;
     
     // Start is called before the first frame update
     void Start()
@@ -23,8 +24,8 @@ public class StartForm : MonoSingleton<StartForm>
         StartButton1.GetComponentInChildren<TMP_Text>().text = "Here LG comes";
         EndButton1.GetComponentInChildren<TMP_Text>().text = "There LG goes";
 
-        StartButton1.gameObject.SetActive(false);
-        EndButton1.gameObject.SetActive(false);
+        StartButton1.gameObject.SetActive(true);
+        EndButton1.gameObject.SetActive(true);
         //var ButtonText = StartButton1.GetComponentsInChildren<Text>();
     }
 
@@ -36,6 +37,7 @@ public class StartForm : MonoSingleton<StartForm>
 
     public void OnChoiceSelected(int ChoiceIndex)
     {
+        Debug.LogFormat("ChoiceIndex" + ChoiceIndex);
         BattleFieldBehaviour BattleFieldBehaviour = (BattleFieldBehaviour)BattleField.GetComponent<BattleFieldBehaviour>();
         BattleFieldBehaviour.GameplayFsm.ProcessEvent(BattleFieldBehaviour.GameplayContext, GameplayEventType.GameplayEventType_StartGame);
 

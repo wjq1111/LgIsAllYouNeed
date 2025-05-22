@@ -18,7 +18,6 @@ public class BattleFieldBehaviour : MonoSingleton<BattleFieldBehaviour>
     private const int battleFieldMaxWidth = 8;
     private const int battleFieldMaxHeight = 3;
 
-
     // Start is called before the first frame update
     void Start()
     {
@@ -26,8 +25,9 @@ public class BattleFieldBehaviour : MonoSingleton<BattleFieldBehaviour>
         GameplayContext.CurStatusType = GameplayStatusType.GameplayStatus_WaitStart;
 
         GameplayFsm.Init(GameplayContext);
+        GameplayContext.GpFsm = GameplayFsm;
 
-        GenerateMap();
+        GenerateBattleFieldTiles();
 
         GameObject Tile = GetTile(0, 1);
         BattleFieldTileBehaviour TileBehaviour = Tile.GetComponent<BattleFieldTileBehaviour>();
@@ -59,7 +59,7 @@ public class BattleFieldBehaviour : MonoSingleton<BattleFieldBehaviour>
     }
 
     // Generate the actual Hex-style map
-    void GenerateMap()
+    private void GenerateBattleFieldTiles()
     {
         for (int i = 0; i < battleFieldMaxWidth; i++)
         {

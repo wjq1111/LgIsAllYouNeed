@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using static System.DateTimeOffset;
 using UnityEngine;
+using UnityEditor.MPE;
 
 public class GameplayAction
 {
@@ -79,8 +80,45 @@ public class RoundStartAction : GameplayAction
         base.OnEnter(Context);
         GameplayStatus GpCurStatus = GetCurStatus(Context);
         GpCurStatus.StartTime = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds();
-        GpCurStatus.TimeoutTime = GpCurStatus.StartTime + 10;
+        GpCurStatus.TimeoutTime = GpCurStatus.StartTime + 2;
+
+        // 系统发牌，直接加到player手牌
+        List<Card> CardList = CardDeck.Instance.DrawCards(1);
+        if (GpCurStatus.CurPlayerIndex > Context.Players.Count)
+        {
+            Debug.LogError("cur player index invalid " + GpCurStatus.CurPlayerIndex);
+            return -1;
+        }
+        Context.Players[GpCurStatus.CurPlayerIndex].AddCard(CardList);
+
+        GameplayEvent GpEvent = new GameplayEvent();
+        GpEvent.Param = GpCurStatus.CurPlayerIndex;
+        GpEvent.Type = GameplayEventType.GameplayEventType_DrawCard;
+        Context.GpFsm.ProcessEvent(Context, GpEvent);
+
+        GpCurStatus.CurPlayerIndex = (GpCurStatus.CurPlayerIndex + 1) % Context.Players.Count;
+        Debug.Log("cur player index -> " + GpCurStatus.CurPlayerIndex);
+
         return 0;
+    }
+
+    public override GameplayEventResult OnEvent(GameplayContext Context, GameplayEvent GpEvent)
+    {
+        base.OnEvent(Context, GpEvent);
+        if (GpEvent.Type == GameplayEventType.GameplayEventType_DrawCard)
+        {
+            // 把牌渲染到CardSession上
+            int PlayerIndex = GpEvent.Param;
+            Player CurPlayer = Context.Players[PlayerIndex];
+
+            GameObject CardSessionObj = GameFramework.Instance.GetCardSessionObj();
+            CardSessionBehaviour CardSessionBehaviour = CardSessionObj.GetComponent<CardSessionBehaviour>();
+            CardSessionBehaviour.ShowCards(CurPlayer.CardList);
+
+            return GameplayEventResult.GameplayEventResult_NeedSwitch;
+        }
+
+        return GameplayEventResult.GameplayEventResult_NoNeedSwitch;
     }
 
     public override int OnUpdate(GameplayContext Context)
@@ -90,7 +128,6 @@ public class RoundStartAction : GameplayAction
         if (GpCurStatus.TimeoutTime < new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds())
         {
             // 超时
-            Debug.LogError("round start timeout");
             return -1;
         }
         // update
@@ -98,11 +135,24 @@ public class RoundStartAction : GameplayAction
     }
 }
 
+public class RoundingAction : GameplayAction
+{
+    public override int OnEnter(GameplayContext Context)
+    {
+        return base.OnEnter(Context);
+    }
+
+    public override int OnUpdate(GameplayContext Context)
+    {
+        return base.OnUpdate(Context);
+    }
+}
+
 public class GameplayActionMgr : Singleton<GameplayActionMgr>
 {
     private WaitStartAction waitStartAction = new WaitStartAction();
     private RoundStartAction roundStartAction = new RoundStartAction();
-    private GameplayAction roundingAction = new GameplayAction();
+    private RoundingAction roundingAction = new RoundingAction();
     private GameplayAction roundEndAction = new GameplayAction();
 
     private Dictionary<GameplayStatusType, GameplayAction> actionMap = new Dictionary<GameplayStatusType, GameplayAction>();

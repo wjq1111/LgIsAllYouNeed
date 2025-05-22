@@ -17,11 +17,13 @@ public class GameplayFsm
     {
         // 注册状态转换图
         RegisterTransition(GameplayStatusType.GameplayStatus_WaitStart, GameplayEventType.GameplayEventType_StartGame, GameplayStatusType.GameplayStatus_RoundStart);
+        RegisterTransition(GameplayStatusType.GameplayStatus_RoundStart, GameplayEventType.GameplayEventType_DrawCard, GameplayStatusType.GameplayStatus_Rounding);
 
 
         // 注册action列表
         RegisterAction(GameplayStatusType.GameplayStatus_WaitStart);
         RegisterAction(GameplayStatusType.GameplayStatus_RoundStart);
+        RegisterAction(GameplayStatusType.GameplayStatus_Rounding);
 
         // 处理第一个状态
         GameplayAction GpCurAction = GetAction(Context, Context.CurStatusType);

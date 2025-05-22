@@ -60,18 +60,23 @@
     <Analyzer Include="C:\Program Files\Unity\Hub\Editor\2022.3.57f1c2\Editor\Data\Tools\Unity.SourceGenerators\Unity.Properties.SourceGenerator.dll" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Assets\Scripts\Gameplay\BattleFieldTileBehaviour.cs" />
     <Compile Include="Assets\Tile.cs" />
     <Compile Include="Assets\Scripts\Gameplay\GameplayContext.cs" />
+    <Compile Include="Assets\Scripts\Gameplay\CardDeck.cs" />
     <Compile Include="Assets\Scripts\Utility\Singleton.cs" />
+    <Compile Include="Assets\Scripts\Gameplay\Card.cs" />
+    <Compile Include="Assets\Scripts\Gameplay\CardSessionBehaviour.cs" />
     <Compile Include="Assets\Scripts\Utility\MonoSingleton.cs" />
+    <Compile Include="Assets\Scripts\Gameplay\BattleFieldBehaviour.cs" />
     <Compile Include="Assets\Scripts\Forms\StartForm.cs" />
+    <Compile Include="Assets\Scripts\Gameplay\Player.cs" />
     <Compile Include="Assets\Scripts\Gameplay\GameplayStatus.cs" />
-    <Compile Include="Assets\Scripts\Gameplay\BattleFieldTile.cs" />
     <Compile Include="Assets\Scripts\Gameplay\GameplayDefines.cs" />
     <Compile Include="Assets\Scripts\Gameplay\GameplayFsm.cs" />
+    <Compile Include="Assets\Scripts\Gameplay\CardBehaviour.cs" />
     <Compile Include="Assets\Scripts\Gameplay\GameplayAction.cs" />
     <Compile Include="Assets\Scripts\GameFramework.cs" />
-    <Compile Include="Assets\Scripts\Gameplay\BattleField.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\TextMesh Pro\Shaders\TMPro.cginc" />
