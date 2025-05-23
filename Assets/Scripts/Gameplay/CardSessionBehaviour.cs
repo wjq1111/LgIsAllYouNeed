@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Xml.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -37,7 +38,7 @@ public class CardSessionBehaviour : MonoSingleton<CardSessionBehaviour>
         PrefabBehaviour.CoordY = StartY + RealY + CanvasY;
 
         Button PrefabButton = Prefab.GetComponentInChildren<Button>();
-        PrefabButton.onClick.AddListener(() => cardOnClick(Prefab.name));
+        PrefabButton.onClick.AddListener(() => CardOnClick(PosX, PosY));
 
 
         return Prefab;
@@ -51,22 +52,25 @@ public class CardSessionBehaviour : MonoSingleton<CardSessionBehaviour>
     }
 
 
-
     public void ShowCards(List<Card> CardList)
     {
-        foreach (Card card in CardList)
+        // 先把手牌区所有card清空
+        for (int i = 0; i < cardMaxCount; i++)
         {
-            Debug.Log("show card " + card.Gid);
+            string Name = "Card-" + i + "-0";
+            GameObject CardButton = GameFramework.DfsObj(GameFramework.Instance.StartPrefab.transform, Name).gameObject;
+            TMP_Text CardButtonText = CardButton.GetComponentInChildren<TMP_Text>();
+            CardButtonText.text = "Card-" + i + "-0";
         }
         for (int i = 0; i < CardList.Count; i++)
         {
-            string name = "Card-" + i + "-0";
-            Card card = CardList[i];
-            GameObject cardButton = GameFramework.DfsObj(GameFramework.Instance.StartPrefab.transform, name).gameObject;
-            TMP_Text cardButtonText = cardButton.GetComponentInChildren<TMP_Text>();
-            cardButtonText.text = card.Name;
-        }
+            string Name = "Card-" + i + "-0";
+            GameObject CardButton = GameFramework.DfsObj(GameFramework.Instance.StartPrefab.transform, Name).gameObject;
+            TMP_Text CardButtonText = CardButton.GetComponentInChildren<TMP_Text>();
 
+            Card Card = CardList[i];
+            CardButtonText.text = Card.Name;
+        }
     }
 
 
@@ -76,8 +80,26 @@ public class CardSessionBehaviour : MonoSingleton<CardSessionBehaviour>
         
     }
 
-    void cardOnClick(string text)
+    private void CardOnClick(int PosX, int PosY)
     {
-        Debug.Log(text + " clicked! ");
+        GameObject BattleField = GameFramework.Instance.GetBattleFieldObj();
+        BattleFieldBehaviour BattleFieldBehaviour = BattleField.GetComponent<BattleFieldBehaviour>();
+
+        GameplayContext GpContext = BattleFieldBehaviour.GameplayContext;
+        GameplayFsm GpFsm = BattleFieldBehaviour.GameplayFsm;
+
+        Player CurPlayer = GpContext.Players[GpFsm.GetCurStatus(GpContext).CurPlayerIndex];
+        if (PosX + 1 > CurPlayer.CardList.Count)
+        {
+            return;
+        }
+
+
+        GameplayEvent GpEvent = new GameplayEvent();
+        GpEvent.Type = GameplayEventType.GameplayEventType_ClickCard;
+        GpEvent.ClickCardEvent = new GameplayEventClickCard();
+        GpEvent.ClickCardEvent.PosX = PosX;
+        GpEvent.ClickCardEvent.PosY = PosY;
+        GpFsm.ProcessEvent(GpContext, GpEvent);
     }
 }

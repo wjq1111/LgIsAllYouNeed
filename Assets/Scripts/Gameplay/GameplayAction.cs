@@ -78,12 +78,15 @@ public class RoundStartAction : GameplayAction
     public override int OnEnter(GameplayContext Context)
     {
         base.OnEnter(Context);
+
+        CardDeck.Instance.Init(Handbook.Instance.UnlockedCards);
+
         GameplayStatus GpCurStatus = GetCurStatus(Context);
         GpCurStatus.StartTime = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds();
         GpCurStatus.TimeoutTime = GpCurStatus.StartTime + 2;
 
         // 系统发牌，直接加到player手牌
-        List<Card> CardList = CardDeck.Instance.DrawCards(3);
+        List<Card> CardList = CardDeck.Instance.DrawCards(GameFramework.Instance.CardNumPerRound);
         if (GpCurStatus.CurPlayerIndex > Context.Players.Count)
         {
             Debug.LogError("cur player index invalid " + GpCurStatus.CurPlayerIndex);
@@ -92,12 +95,8 @@ public class RoundStartAction : GameplayAction
         Context.Players[GpCurStatus.CurPlayerIndex].AddCard(CardList);
 
         GameplayEvent GpEvent = new GameplayEvent();
-        GpEvent.Param = GpCurStatus.CurPlayerIndex;
         GpEvent.Type = GameplayEventType.GameplayEventType_DrawCard;
         Context.GpFsm.ProcessEvent(Context, GpEvent);
-
-        GpCurStatus.CurPlayerIndex = (GpCurStatus.CurPlayerIndex + 1) % Context.Players.Count;
-        Debug.Log("cur player index -> " + GpCurStatus.CurPlayerIndex);
 
         return 0;
     }
@@ -108,7 +107,7 @@ public class RoundStartAction : GameplayAction
         if (GpEvent.Type == GameplayEventType.GameplayEventType_DrawCard)
         {
             // 把牌渲染到CardSession上
-            int PlayerIndex = GpEvent.Param;
+            int PlayerIndex = GetCurStatus(Context).CurPlayerIndex;
             Player CurPlayer = Context.Players[PlayerIndex];
 
             GameObject CardSessionObj = GameFramework.Instance.GetCardSessionObj();
@@ -142,18 +141,92 @@ public class RoundingAction : GameplayAction
         return base.OnEnter(Context);
     }
 
+    public override GameplayEventResult OnEvent(GameplayContext Context, GameplayEvent GpEvent)
+    {
+        base.OnEvent(Context, GpEvent);
+
+        if (GpEvent.Type == GameplayEventType.GameplayEventType_ClickCard)
+        {
+            GameplayStatus GpCurStatus = GetCurStatus(Context);
+            Player CurPlayer = Context.Players[GpCurStatus.CurPlayerIndex];
+            CurPlayer.ChooseCardPosX = GpEvent.ClickCardEvent.PosX;
+            CurPlayer.ChooseCardPosY = GpEvent.ClickCardEvent.PosY;
+        }
+
+        if (GpEvent.Type == GameplayEventType.GameplayEventType_ClickTile)
+        {
+            GameplayStatus GpCurStatus = GetCurStatus(Context);
+            Player CurPlayer = Context.Players[GpCurStatus.CurPlayerIndex];
+
+            if (CurPlayer.ChooseCardPosX == -1 && CurPlayer.ChooseCardPosY == -1)
+            {
+                // 玩家已选择的卡的位置是非法值，说明没有点手牌，直接点了tile
+                // 判断tile上有没有棋子，如果有的话，在下一次点tile的时候，移动棋子
+                return GameplayEventResult.GameplayEventResult_NoNeedSwitch;
+            }
+            else
+            {
+                // 玩家已选择的卡的位置不是非法值，认为玩家已经选了卡，现在要放到某个格子上
+                int TilePosX = GpEvent.ClickTileEvent.PosX;
+                int TilePosY = GpEvent.ClickTileEvent.PosY;
+
+                // 把玩家选的那个卡渲染到玩家选的那个格子上
+                GameObject BattleFieldObj = GameFramework.Instance.GetBattleFieldObj();
+                BattleFieldBehaviour BattleFieldBehaviour = BattleFieldObj.GetComponent<BattleFieldBehaviour>();
+                BattleFieldBehaviour.ShowTile(CurPlayer.ChooseCardPosX, CurPlayer.ChooseCardPosY, TilePosX, TilePosY);
+
+                // 删除玩家手牌，马上重新渲染card session
+                CurPlayer.DelCard(CurPlayer.ChooseCardPosX, CurPlayer.ChooseCardPosY);
+                GameObject CardSessionObj = GameFramework.Instance.GetCardSessionObj();
+                CardSessionBehaviour CardSessionBehaviour = CardSessionObj.GetComponent<CardSessionBehaviour>();
+                CardSessionBehaviour.ShowCards(CurPlayer.CardList);
+
+                CurPlayer.ResetChooseCard();
+            }
+        }
+        return GameplayEventResult.GameplayEventResult_NoNeedSwitch;
+    }
+
     public override int OnUpdate(GameplayContext Context)
     {
         return base.OnUpdate(Context);
     }
 }
 
+public class RoundEndAction : GameplayAction
+{
+    public override int OnEnter(GameplayContext Context)
+    {
+        return base.OnEnter(Context);
+    }
+
+    public override GameplayEventResult OnEvent(GameplayContext Context, GameplayEvent GpEvent)
+    {
+        return base.OnEvent(Context, GpEvent);
+    }
+
+    public override int OnUpdate(GameplayContext Context)
+    {
+        return base.OnUpdate(Context);
+    }
+
+    public override int OnExit(GameplayContext Context, GameplayEvent GpEvent)
+    {
+        GameplayStatus GpCurStatus = GetCurStatus(Context);
+        GpCurStatus.CurPlayerIndex = (GpCurStatus.CurPlayerIndex + 1) % Context.Players.Count;
+        Debug.Log("cur player index -> " + GpCurStatus.CurPlayerIndex);
+        return 0;
+    }
+}
+
+
+
 public class GameplayActionMgr : Singleton<GameplayActionMgr>
 {
     private WaitStartAction waitStartAction = new WaitStartAction();
     private RoundStartAction roundStartAction = new RoundStartAction();
     private RoundingAction roundingAction = new RoundingAction();
-    private GameplayAction roundEndAction = new GameplayAction();
+    private RoundEndAction roundEndAction = new RoundEndAction();
 
     private Dictionary<GameplayStatusType, GameplayAction> actionMap = new Dictionary<GameplayStatusType, GameplayAction>();
 

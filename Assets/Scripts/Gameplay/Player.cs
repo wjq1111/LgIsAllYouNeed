@@ -6,11 +6,23 @@ public class Player
 {
     private List<Card> cardList = new List<Card> ();
 
+    // 玩家现在选择了哪一张手牌
+    private int chooseCardPosX = -1;
+    private int chooseCardPosY = -1;
+
     public List<Card> CardList { get => cardList; set => cardList = value; }
+    public int ChooseCardPosX { get => chooseCardPosX; set => chooseCardPosX = value; }
+    public int ChooseCardPosY { get => chooseCardPosY; set => chooseCardPosY = value; }
 
     public void InitPlayer()
     {
         
+    }
+
+    public void ResetChooseCard()
+    {
+        ChooseCardPosX = -1;
+        ChooseCardPosY = -1;
     }
 
     public void AddCard(List<Card> AddCardList)
@@ -19,8 +31,10 @@ public class Player
         {
             CardList.Add(AddCard);
         }
+    }
 
-        // 再次渲染自己的手牌
-
+    public void DelCard(int PosX, int PosY)
+    {
+        CardList.RemoveAt(PosX);
     }
 }

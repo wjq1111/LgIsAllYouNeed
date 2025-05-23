@@ -14,6 +14,8 @@ public enum GameplayEventType
     GameplayEventType_Invalid = 0,
     GameplayEventType_StartGame,
     GameplayEventType_DrawCard,
+    GameplayEventType_ClickCard,
+    GameplayEventType_ClickTile,
     GameplayEventType_CloseGame,
     GameplayEventType_Timeout,
 }
@@ -25,13 +27,24 @@ public enum GameplayEventResult
     GameplayEventResult_NeedSwitch,
 }
 
+public class GameplayEventClickCard
+{
+    public int PosX = 0;
+    public int PosY = 0;
+}
+
+public class GameplayEventClickTile
+{
+    public int PosX = 0;
+    public int PosY = 0;
+}
+
 public class GameplayEvent
 {
     // 事件类型
-    private GameplayEventType type = GameplayEventType.GameplayEventType_Invalid;
+    public GameplayEventType Type = GameplayEventType.GameplayEventType_Invalid;
     // 事件参数，后续按需添加
-    private int param = 0;
+    public GameplayEventClickCard ClickCardEvent = new GameplayEventClickCard();
+    public GameplayEventClickTile ClickTileEvent = new GameplayEventClickTile();
 
-    public GameplayEventType Type { get => type; set => type = value; }
-    public int Param { get => param; set => param = value; }
 }

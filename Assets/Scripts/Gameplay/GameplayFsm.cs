@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class GameplayFsm
@@ -9,8 +10,12 @@ public class GameplayFsm
     // action列表
     private Dictionary<GameplayStatusType, GameplayAction> actionMap = new Dictionary<GameplayStatusType, GameplayAction>();
 
+    // 事件队列，必须前一个事件处理完再处理下一个事件
+    public Queue<GameplayEvent> eventQueue = new Queue<GameplayEvent>();
+
     public Dictionary<GameplayStatusType, Dictionary<GameplayEventType, GameplayStatusType>> TransitionMap { get => transitionMap; set => transitionMap = value; }
     public Dictionary<GameplayStatusType, GameplayAction> ActionMap { get => actionMap; set => actionMap = value; }
+
 
     // 初始化函数
     public void Init(GameplayContext Context)
@@ -105,12 +110,27 @@ public class GameplayFsm
     // 处理事件
     public int ProcessEvent(GameplayContext Context, GameplayEvent GpEvent)
     {
-        int Ret = ExecuteEvent(Context, GpEvent);
-        if (Ret != 0)
+        if (eventQueue.Count > 20)
         {
-            GameplayStatus GpCurStatus = GetCurStatus(Context);
-            GameplayAction GpCurAction = GetAction(Context, GpCurStatus.GpType);
-            return GpCurAction.OnError(Context);
+            Debug.LogError("event queue full, maybe something wrong");
+            return -1;
+        }
+        eventQueue.Enqueue(GpEvent);
+        if (eventQueue.Count > 1)
+        {
+            return 0;
+        }
+        while (eventQueue.Count > 0)
+        {
+            GameplayEvent CurEvent = eventQueue.First();
+            int Ret = ExecuteEvent(Context, CurEvent);
+            if (Ret != 0)
+            {
+                GameplayStatus GpCurStatus = GetCurStatus(Context);
+                GameplayAction GpCurAction = GetAction(Context, GpCurStatus.GpType);
+                return GpCurAction.OnError(Context);
+            }
+            eventQueue.Dequeue();
         }
         return 0;
     }

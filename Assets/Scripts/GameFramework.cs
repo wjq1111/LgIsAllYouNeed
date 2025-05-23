@@ -7,6 +7,8 @@ public class GameFramework : MonoSingleton<GameFramework>
     private GameObject startPrefab;
     public GameObject StartPrefab { get => startPrefab; set => startPrefab = value; }
 
+    public int CardNumPerRound = 3;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -15,7 +17,6 @@ public class GameFramework : MonoSingleton<GameFramework>
 
         GameplayActionMgr.Instance.Init();
         Handbook.Instance.Init();
-        CardDeck.Instance.Init();
     }
 
     public static Transform DfsObj(Transform Transform, string TargetName)
@@ -35,6 +36,11 @@ public class GameFramework : MonoSingleton<GameFramework>
             }
         }
         return null;
+    }
+
+    public GameObject GetBattleFieldObj()
+    {
+        return DfsObj(StartPrefab.transform, "BattleField").gameObject;
     }
 
     public GameObject GetCardSessionObj()

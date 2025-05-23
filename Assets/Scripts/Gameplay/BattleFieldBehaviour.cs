@@ -28,10 +28,6 @@ public class BattleFieldBehaviour : MonoSingleton<BattleFieldBehaviour>
         GameplayContext.GpFsm = GameplayFsm;
 
         GenerateBattleFieldTiles();
-
-        GameObject Tile = GetTile(0, 1);
-        BattleFieldTileBehaviour TileBehaviour = Tile.GetComponent<BattleFieldTileBehaviour>();
-        Debug.Log(TileBehaviour.Log());
     }
 
     private GameObject InstantiateTile(int PosX, int PosY)
@@ -54,6 +50,9 @@ public class BattleFieldBehaviour : MonoSingleton<BattleFieldBehaviour>
         PrefabBehaviour.PosY = PosY;
         PrefabBehaviour.CoordX = StartX + RealX;
         PrefabBehaviour.CoordY = StartY + RealY + CanvasY;
+
+        Button PrefabButton = Prefab.GetComponentInChildren<Button>();
+        PrefabButton.onClick.AddListener(() => TileOnClick(PosX, PosY));
 
         return Prefab;
     }
@@ -80,6 +79,21 @@ public class BattleFieldBehaviour : MonoSingleton<BattleFieldBehaviour>
         }
     }
 
+    public void ShowTile(int PlayerChooseCardX, int PlayerChooseCardY, int PosX, int PosY)
+    {
+        if (PlayerChooseCardX == -1 || PlayerChooseCardY == -1)
+        {
+            return;
+        }
+
+        GameObject Tile = GetTile(PosX, PosY);
+
+        Player CurPlayer = GameplayContext.Players[GameplayFsm.GetCurStatus(GameplayContext).CurPlayerIndex];
+        // TODO 如果以后变成了两排，需要注意
+        Card ChooseCard = CurPlayer.CardList[PlayerChooseCardX];
+        Tile.GetComponentInChildren<TMP_Text>().SetText(ChooseCard.Name);
+    }
+
     public GameObject GetTile(int PosX, int PosY)
     {
         if (ButtonMap.ContainsKey(PosX) == false)
@@ -93,6 +107,16 @@ public class BattleFieldBehaviour : MonoSingleton<BattleFieldBehaviour>
             return null;
         }
         return ButtonMap[PosX][PosY];
+    }
+
+    public void TileOnClick(int PosX, int PosY)
+    {
+        GameplayEvent GpEvent = new GameplayEvent();
+        GpEvent.Type = GameplayEventType.GameplayEventType_ClickTile;
+        GpEvent.ClickTileEvent = new GameplayEventClickTile();
+        GpEvent.ClickTileEvent.PosX = PosX;
+        GpEvent.ClickTileEvent.PosY = PosY;
+        GameplayFsm.ProcessEvent(GameplayContext, GpEvent);
     }
 
     // Update is called once per frame
