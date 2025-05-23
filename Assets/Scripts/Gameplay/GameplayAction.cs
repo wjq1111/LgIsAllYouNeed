@@ -83,7 +83,7 @@ public class RoundStartAction : GameplayAction
         GpCurStatus.TimeoutTime = GpCurStatus.StartTime + 2;
 
         // 系统发牌，直接加到player手牌
-        List<Card> CardList = CardDeck.Instance.DrawCards(1);
+        List<Card> CardList = CardDeck.Instance.DrawCards(3);
         if (GpCurStatus.CurPlayerIndex > Context.Players.Count)
         {
             Debug.LogError("cur player index invalid " + GpCurStatus.CurPlayerIndex);

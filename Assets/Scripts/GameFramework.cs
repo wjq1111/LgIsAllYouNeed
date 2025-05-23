@@ -14,6 +14,7 @@ public class GameFramework : MonoSingleton<GameFramework>
         StartPrefab = Instantiate((GameObject)Resources.Load("Prefabs/Start"));
 
         GameplayActionMgr.Instance.Init();
+        Handbook.Instance.Init();
         CardDeck.Instance.Init();
     }
 

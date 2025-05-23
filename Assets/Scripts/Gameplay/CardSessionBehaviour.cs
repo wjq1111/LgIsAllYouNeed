@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class CardSessionBehaviour : MonoSingleton<CardSessionBehaviour>
 {
@@ -35,6 +36,10 @@ public class CardSessionBehaviour : MonoSingleton<CardSessionBehaviour>
         PrefabBehaviour.CoordX = StartX + RealX;
         PrefabBehaviour.CoordY = StartY + RealY + CanvasY;
 
+        Button PrefabButton = Prefab.GetComponentInChildren<Button>();
+        PrefabButton.onClick.AddListener(() => cardOnClick(Prefab.name));
+
+
         return Prefab;
     }
     private void GenerateCardSession()
@@ -45,12 +50,23 @@ public class CardSessionBehaviour : MonoSingleton<CardSessionBehaviour>
         }
     }
 
+
+
     public void ShowCards(List<Card> CardList)
     {
         foreach (Card card in CardList)
         {
             Debug.Log("show card " + card.Gid);
         }
+        for (int i = 0; i < CardList.Count; i++)
+        {
+            string name = "Card-" + i + "-0";
+            Card card = CardList[i];
+            GameObject cardButton = GameFramework.DfsObj(GameFramework.Instance.StartPrefab.transform, name).gameObject;
+            TMP_Text cardButtonText = cardButton.GetComponentInChildren<TMP_Text>();
+            cardButtonText.text = card.Name;
+        }
+
     }
 
 
@@ -58,5 +74,10 @@ public class CardSessionBehaviour : MonoSingleton<CardSessionBehaviour>
     void Update()
     {
         
+    }
+
+    void cardOnClick(string text)
+    {
+        Debug.Log(text + " clicked! ");
     }
 }
