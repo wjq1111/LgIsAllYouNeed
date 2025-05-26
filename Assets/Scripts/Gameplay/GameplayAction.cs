@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using static System.DateTimeOffset;
 using UnityEngine;
 using UnityEditor.MPE;
+using Unity.Mathematics;
 
 public class GameplayAction
 {
@@ -149,8 +150,12 @@ public class RoundingAction : GameplayAction
         {
             GameplayStatus GpCurStatus = GetCurStatus(Context);
             Player CurPlayer = Context.Players[GpCurStatus.CurPlayerIndex];
-            CurPlayer.ChooseCardPosX = GpEvent.ClickCardEvent.PosX;
-            CurPlayer.ChooseCardPosY = GpEvent.ClickCardEvent.PosY;
+
+            if (CurPlayer.CardList[GpEvent.ClickCardEvent.PosX].CardId != 0)
+            {
+                CurPlayer.ChooseCardPosX = GpEvent.ClickCardEvent.PosX;
+                CurPlayer.ChooseCardPosY = GpEvent.ClickCardEvent.PosY;
+            }
         }
 
         if (GpEvent.Type == GameplayEventType.GameplayEventType_ClickTile)
@@ -162,6 +167,40 @@ public class RoundingAction : GameplayAction
             {
                 // 玩家已选择的卡的位置是非法值，说明没有点手牌，直接点了tile
                 // 判断tile上有没有棋子，如果有的话，在下一次点tile的时候，移动棋子
+                if (CurPlayer.ChooseBattleFileTilePosX == -1 && CurPlayer.ChooseBattleFileTilePosY == -1)
+                {
+                    CurPlayer.ChooseBattleFileTilePosX = GpEvent.ClickTileEvent.PosX;
+                    CurPlayer.ChooseBattleFileTilePosY = GpEvent.ClickTileEvent.PosY;
+                }
+                else
+                {
+                    GameObject BattleFieldObj = GameFramework.Instance.GetBattleFieldObj();
+                    BattleFieldBehaviour BattleFieldBehaviour = BattleFieldObj.GetComponent<BattleFieldBehaviour>();
+                    // 如果上一次选择的格子是空的，则重置选择的格子，如果相同，视为没操作
+                    GameObject OldChooseTile = BattleFieldBehaviour.GetTile(CurPlayer.ChooseBattleFileTilePosX, CurPlayer.ChooseBattleFileTilePosY);
+                    Minion OldMinion = OldChooseTile.GetComponent<BattleFieldTileBehaviour>().Minion;
+                    if (OldMinion == null)
+                    {
+                        CurPlayer.ChooseBattleFileTilePosX = GpEvent.ClickTileEvent.PosX;
+                        CurPlayer.ChooseBattleFileTilePosY = GpEvent.ClickTileEvent.PosY;
+                    }
+                    else if (BattleFieldBehaviour.CanReach(CurPlayer.ChooseBattleFileTilePosX, CurPlayer.ChooseBattleFileTilePosY, GpEvent.ClickTileEvent.PosX, GpEvent.ClickTileEvent.PosY))
+                    {
+                        if (OldMinion.RemainAction > 0)
+                        {
+                            // 先去掉原位置的棋子，再加上新位置的棋子
+                            BattleFieldBehaviour.MoveTile(CurPlayer.ChooseBattleFileTilePosX, CurPlayer.ChooseBattleFileTilePosY, GpEvent.ClickTileEvent.PosX, GpEvent.ClickTileEvent.PosY);
+                            BattleFieldBehaviour.GetTile(GpEvent.ClickTileEvent.PosX, GpEvent.ClickTileEvent.PosY);
+                            CurPlayer.ResetChooseBattleFieldTile();
+                        }
+                    }
+                    else
+                    {
+                        CurPlayer.ChooseBattleFileTilePosX = GpEvent.ClickTileEvent.PosX;
+                        CurPlayer.ChooseBattleFileTilePosY = GpEvent.ClickTileEvent.PosY;
+                    }
+                }
+
                 return GameplayEventResult.GameplayEventResult_NoNeedSwitch;
             }
             else
@@ -170,10 +209,10 @@ public class RoundingAction : GameplayAction
                 int TilePosX = GpEvent.ClickTileEvent.PosX;
                 int TilePosY = GpEvent.ClickTileEvent.PosY;
 
-                // 把玩家选的那个卡渲染到玩家选的那个格子上
+                // 把玩家选的那个卡 变成棋子 放到玩家选的那个格子上
                 GameObject BattleFieldObj = GameFramework.Instance.GetBattleFieldObj();
                 BattleFieldBehaviour BattleFieldBehaviour = BattleFieldObj.GetComponent<BattleFieldBehaviour>();
-                BattleFieldBehaviour.ShowTile(CurPlayer.ChooseCardPosX, CurPlayer.ChooseCardPosY, TilePosX, TilePosY);
+                BattleFieldBehaviour.AddTile(CurPlayer.ChooseCardPosX, CurPlayer.ChooseCardPosY, TilePosX, TilePosY);
 
                 // 删除玩家手牌，马上重新渲染card session
                 CurPlayer.DelCard(CurPlayer.ChooseCardPosX, CurPlayer.ChooseCardPosY);

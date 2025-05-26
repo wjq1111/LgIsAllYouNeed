@@ -29,7 +29,7 @@ public class Handbook : Singleton<Handbook>
     {
         Card StartCard = new Card();
         StartCard.CardId = Index;
-        StartCard.Name = "summon one lmh " + Index + "/ 1";
+        StartCard.Name = "a" + Index + "-d1-f1";
         StartCard.CardEffect = new List<BaseEffect>();
         SummonEffect StartCardSummonEffect = new SummonEffect();
         StartCard.CardEffect.Add(StartCardSummonEffect);

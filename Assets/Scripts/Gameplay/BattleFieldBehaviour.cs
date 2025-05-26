@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
@@ -79,7 +80,93 @@ public class BattleFieldBehaviour : MonoSingleton<BattleFieldBehaviour>
         }
     }
 
-    public void ShowTile(int PlayerChooseCardX, int PlayerChooseCardY, int PosX, int PosY)
+    public bool CanReach(int PosX, int PosY, int ReachPosX, int ReachPosY)
+    {
+        List<Tuple<int, int>> ReachTuple = Reach(PosX, PosY, 1);
+        Debug.Log("PosX:" + PosX + " PosY:" + PosY + " ReachPosX:" + ReachPosX + " ReachPosY:" + ReachPosY + " ReachTuple:" + ReachTuple.ToShortString());
+        foreach (Tuple<int, int> Pos in ReachTuple)
+        {
+            if (Pos.Item1 == ReachPosX && Pos.Item2 == ReachPosY)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // maybe something wrong, but correct when radius = 1
+    public List<Tuple<int, int>> Reach(int x, int y, int radius)
+    {
+        List<Tuple<int, int>> pos = new List<Tuple<int, int>>();
+        int Llimit = x - radius;
+        int Rlimit = x + radius;
+        for (int i = Llimit; i <= Rlimit; i++)
+        {
+            if (i < 0 || i > battleFieldMaxWidth)
+            {
+                continue;
+            }
+            if (i == x)
+            {
+                continue;
+            }
+            Tuple<int, int> point = new Tuple<int, int>(i, y);
+            pos.Add(point);
+        }
+        for (int i = 1; i <= radius; i++)
+        {
+            if (y % 2 == 1)
+            {
+                Llimit++;
+            }
+            else
+            {
+                Rlimit--;
+            }
+            for (int j = Llimit; j <= Rlimit; j++)
+            {
+                if (j < 0 || j > battleFieldMaxWidth)
+                {
+                    continue;
+                }
+                if (y + i < battleFieldMaxHeight)
+                {
+                    Tuple<int, int> upperPoint = new Tuple<int, int>(j, y + i);
+                    pos.Add(upperPoint);
+                }
+                if (y - i >= 0)
+                {
+                    Tuple<int, int> lowerPoint = new Tuple<int, int>(j, y - i);
+                    pos.Add(lowerPoint);
+                }
+
+            }
+        }
+        return pos;
+    }
+
+    private void RemoveTileMinion(int PosX, int PosY)
+    {
+        GameObject Tile = GetTile(PosX, PosY);
+        Tile.GetComponent<BattleFieldTileBehaviour>().Minion = null;
+        Tile.GetComponentInChildren<TMP_Text>().SetText(PosX + "-" + PosY);
+    }
+    
+    public void MoveTile(int OldPosX, int OldPosY, int PosX, int PosY)
+    {
+        GameObject OldTile = GetTile(OldPosX, OldPosY);
+        Minion OldMinion = OldTile.GetComponent<BattleFieldTileBehaviour>().Minion;
+        OldMinion.RemainAction -= 1;
+
+        GameObject NewTile = GetTile(PosX, PosY);
+        NewTile.GetComponent<BattleFieldTileBehaviour>().Minion = new Minion();
+        NewTile.GetComponent<BattleFieldTileBehaviour>().Minion.Copy(OldMinion);
+        NewTile.GetComponentInChildren<TMP_Text>().SetText(OldMinion.Name);
+
+        RemoveTileMinion(OldPosX, OldPosY);
+    }
+
+    public void AddTile(int PlayerChooseCardX, int PlayerChooseCardY, int PosX, int PosY)
     {
         if (PlayerChooseCardX == -1 || PlayerChooseCardY == -1)
         {
@@ -91,7 +178,19 @@ public class BattleFieldBehaviour : MonoSingleton<BattleFieldBehaviour>
         Player CurPlayer = GameplayContext.Players[GameplayFsm.GetCurStatus(GameplayContext).CurPlayerIndex];
         // TODO 如果以后变成了两排，需要注意
         Card ChooseCard = CurPlayer.CardList[PlayerChooseCardX];
-        Tile.GetComponentInChildren<TMP_Text>().SetText(ChooseCard.Name);
+
+        // TODO 配置
+        int CardId = ChooseCard.CardId;
+        Minion CardMinion = new Minion();
+        CardMinion.Attack = CardId;
+        CardMinion.Defense = 1;
+        CardMinion.Hitpoint = 1;
+        CardMinion.Name = "lmh a"+ CardId+"-d1-h1";
+        CardMinion.RemainAction = 3;
+        CardMinion.MaxAction = 3;
+        Tile.GetComponent<BattleFieldTileBehaviour>().Minion = CardMinion;
+
+        Tile.GetComponentInChildren<TMP_Text>().SetText(CardMinion.Name);
     }
 
     public GameObject GetTile(int PosX, int PosY)
