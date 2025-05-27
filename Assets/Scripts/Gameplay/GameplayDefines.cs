@@ -7,6 +7,7 @@ public enum GameplayStatusType
     GameplayStatus_RoundStart,
     GameplayStatus_Rounding,
     GameplayStatus_RoundEnd,
+    GameplayStatus_FinishGame,
 }
 
 public enum GameplayEventType
@@ -16,7 +17,10 @@ public enum GameplayEventType
     GameplayEventType_DrawCard,
     GameplayEventType_ClickCard,
     GameplayEventType_ClickTile,
+    GameplayEventType_EndRound,
+    GameplayEventType_NewRound,
     GameplayEventType_CloseGame,
+    GameplayEventType_CheckFinishGame,
     GameplayEventType_Timeout,
 }
 
@@ -47,4 +51,10 @@ public class GameplayEvent
     public GameplayEventClickCard ClickCardEvent = new GameplayEventClickCard();
     public GameplayEventClickTile ClickTileEvent = new GameplayEventClickTile();
 
+}
+
+public enum EPlayerIndex
+{
+    RealPlayerIndex = 0,
+    EnemyPlayerIndex = 1,
 }

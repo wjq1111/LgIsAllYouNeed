@@ -22,7 +22,18 @@ public class Minion
     public string Name { get => name; set => name = value; }
     public int Attack { get => attack; set => attack = value; }
     public int Defense { get => defense; set => defense = value; }
-    public int Hitpoint { get => hitpoint; set => hitpoint = value; }
+    public int Hitpoint
+    {
+        get => hitpoint;
+        set
+        { 
+            hitpoint = value;
+            // 只要有hp发生了变化，就去计算一次是不是可以游戏结束了
+            GameObject BattleField = GameFramework.DfsObj(GameFramework.Instance.StartPrefab.transform, "BattleField").gameObject;
+            BattleFieldBehaviour BattleFieldBehaviour = BattleField.GetComponent<BattleFieldBehaviour>();
+            BattleFieldBehaviour.GameplayFsm.ProcessEvent(BattleFieldBehaviour.GameplayContext, GameplayEventType.GameplayEventType_CheckFinishGame);
+        }
+    }
     public int RemainAction { get => remainAction; set => remainAction = value; }
     public int MaxAction { get => maxAction; set => maxAction = value; }
     public int RemainMovement { get => remainMovement; set => remainMovement = value; }

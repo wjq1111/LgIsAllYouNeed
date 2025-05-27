@@ -17,18 +17,31 @@ public class GameplayFsm
     public Dictionary<GameplayStatusType, GameplayAction> ActionMap { get => actionMap; set => actionMap = value; }
 
 
+    private int curPlayerIndex = 0;
+    public int CurPlayerIndex { get => curPlayerIndex; set => curPlayerIndex = value; }
+
+
     // 初始化函数
     public void Init(GameplayContext Context)
     {
         // 注册状态转换图
         RegisterTransition(GameplayStatusType.GameplayStatus_WaitStart, GameplayEventType.GameplayEventType_StartGame, GameplayStatusType.GameplayStatus_RoundStart);
+
         RegisterTransition(GameplayStatusType.GameplayStatus_RoundStart, GameplayEventType.GameplayEventType_DrawCard, GameplayStatusType.GameplayStatus_Rounding);
+
+        RegisterTransition(GameplayStatusType.GameplayStatus_Rounding, GameplayEventType.GameplayEventType_EndRound, GameplayStatusType.GameplayStatus_RoundEnd);
+        RegisterTransition(GameplayStatusType.GameplayStatus_Rounding, GameplayEventType.GameplayEventType_CheckFinishGame, GameplayStatusType.GameplayStatus_FinishGame);
+
+        RegisterTransition(GameplayStatusType.GameplayStatus_RoundEnd, GameplayEventType.GameplayEventType_NewRound, GameplayStatusType.GameplayStatus_RoundStart);
 
 
         // 注册action列表
         RegisterAction(GameplayStatusType.GameplayStatus_WaitStart);
         RegisterAction(GameplayStatusType.GameplayStatus_RoundStart);
         RegisterAction(GameplayStatusType.GameplayStatus_Rounding);
+        RegisterAction(GameplayStatusType.GameplayStatus_RoundEnd);
+        RegisterAction(GameplayStatusType.GameplayStatus_FinishGame);
+
 
         // 处理第一个状态
         GameplayAction GpCurAction = GetAction(Context, Context.CurStatusType);

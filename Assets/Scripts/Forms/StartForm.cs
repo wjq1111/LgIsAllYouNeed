@@ -25,7 +25,7 @@ public class StartForm : MonoSingleton<StartForm>
         EndButton1.GetComponentInChildren<TMP_Text>().text = "There LG goes";
 
         StartButton1.gameObject.SetActive(true);
-        EndButton1.gameObject.SetActive(true);
+        EndButton1.gameObject.SetActive(false);
         //var ButtonText = StartButton1.GetComponentsInChildren<Text>();
     }
 
@@ -37,24 +37,19 @@ public class StartForm : MonoSingleton<StartForm>
 
     public void OnChoiceSelected(int ChoiceIndex)
     {
-        Debug.LogFormat("ChoiceIndex" + ChoiceIndex);
-        BattleFieldBehaviour BattleFieldBehaviour = (BattleFieldBehaviour)BattleField.GetComponent<BattleFieldBehaviour>();
-        BattleFieldBehaviour.GameplayFsm.ProcessEvent(BattleFieldBehaviour.GameplayContext, GameplayEventType.GameplayEventType_StartGame);
+        Debug.Log(ConfigMgr.Instance.MinionConfig.MinionConfigMap[1].name);
 
+        BattleFieldBehaviour BattleFieldBehaviour = (BattleFieldBehaviour)BattleField.GetComponent<BattleFieldBehaviour>();
         if (ChoiceIndex == 0)
         {
-            Debug.LogFormat("LG Comes!!!");
+            BattleFieldBehaviour.GameplayFsm.ProcessEvent(BattleFieldBehaviour.GameplayContext, GameplayEventType.GameplayEventType_StartGame);
+
+            StartButton1.gameObject.SetActive(false);
+            EndButton1.gameObject.SetActive(true);
         }
         else if (ChoiceIndex == 1)
         {
-            Debug.LogFormat("LG Goes!!!");
+            BattleFieldBehaviour.GameplayFsm.ProcessEvent(BattleFieldBehaviour.GameplayContext, GameplayEventType.GameplayEventType_EndRound);
         }
-        else
-        {
-            Debug.LogFormat("Unknown Selection!!!!!!!!!!!!!!");
-        }
-
-        StartButton1.gameObject.SetActive(false);
-        EndButton1.gameObject.SetActive(false);
     }
 }

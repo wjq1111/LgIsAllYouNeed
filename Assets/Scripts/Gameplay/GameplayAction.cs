@@ -45,7 +45,9 @@ public class WaitStartAction : GameplayAction
         base.OnEnter(Context);
         GameplayStatus GpCurStatus = GetCurStatus(Context);
         GpCurStatus.StartTime = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds();
-        GpCurStatus.TimeoutTime = GpCurStatus.StartTime + 100;
+        GpCurStatus.TimeoutTime = GpCurStatus.StartTime + 10000;
+
+        CardDeck.Instance.Init(Handbook.Instance.UnlockedCards, Context.GpFsm.CurPlayerIndex);
         return 0;
     }
 
@@ -68,6 +70,14 @@ public class WaitStartAction : GameplayAction
         base.OnEvent(Context, GpEvent);
         if (GpEvent.Type == GameplayEventType.GameplayEventType_StartGame)
         {
+            GameObject BattleFieldObj = GameFramework.Instance.GetBattleFieldObj();
+            BattleFieldBehaviour BattleFieldBehaviour = BattleFieldObj.GetComponent<BattleFieldBehaviour>();
+            BattleFieldBehaviour.GenerateBattleFieldTiles();
+            BattleFieldBehaviour.AddEnemy();
+
+            GameObject CardSessionObj = GameFramework.Instance.GetCardSessionObj();
+            CardSessionBehaviour CardSessionBehaviour = CardSessionObj.GetComponent<CardSessionBehaviour>();
+            CardSessionBehaviour.GenerateCardSession();
             return GameplayEventResult.GameplayEventResult_NeedSwitch;
         }
         return GameplayEventResult.GameplayEventResult_NoNeedSwitch;
@@ -82,18 +92,24 @@ public class RoundStartAction : GameplayAction
         GameplayStatus GpCurStatus = GetCurStatus(Context);
         GpCurStatus.StartTime = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds();
         GpCurStatus.TimeoutTime = GpCurStatus.StartTime + 2;
-        if (GpCurStatus.CurPlayerIndex > Context.Players.Count)
+        if (Context.GpFsm.CurPlayerIndex > Context.Players.Count)
         {
-            Debug.LogError("cur player index invalid " + GpCurStatus.CurPlayerIndex);
+            Debug.LogError("cur player index invalid " + Context.GpFsm.CurPlayerIndex);
             return -1;
         }
 
-        CardDeck.Instance.Init(Handbook.Instance.UnlockedCards, Context.Players[GpCurStatus.CurPlayerIndex].PlayerId);
-        
         // 系统发牌，直接加到player手牌
-        List<Card> CardList = CardDeck.Instance.DrawCards(GameFramework.Instance.CardNumPerRound);
+        GameObject CardSession = GameFramework.DfsObj(GameFramework.Instance.StartPrefab.transform, "CardSession").gameObject;
+        CardSessionBehaviour CardSessionBehaviour = CardSession.GetComponent<CardSessionBehaviour>();
 
-        Context.Players[GpCurStatus.CurPlayerIndex].AddCard(CardList);
+        int CurRoundDrawCardNum = GameFramework.Instance.CardNumPerRound;
+        if (Context.Players[Context.GpFsm.CurPlayerIndex].CardList.Count + CurRoundDrawCardNum > CardSessionBehaviour.CardMaxCount)
+        {
+            CurRoundDrawCardNum = CardSessionBehaviour.CardMaxCount - Context.Players[Context.GpFsm.CurPlayerIndex].CardList.Count;
+        }
+        List<Card> CardList = CardDeck.Instance.DrawCards(CurRoundDrawCardNum);
+
+        Context.Players[Context.GpFsm.CurPlayerIndex].AddCard(CardList);
 
         GameplayEvent GpEvent = new GameplayEvent();
         GpEvent.Type = GameplayEventType.GameplayEventType_DrawCard;
@@ -107,14 +123,16 @@ public class RoundStartAction : GameplayAction
         base.OnEvent(Context, GpEvent);
         if (GpEvent.Type == GameplayEventType.GameplayEventType_DrawCard)
         {
-            // 把牌渲染到CardSession上
-            int PlayerIndex = GetCurStatus(Context).CurPlayerIndex;
-            Player CurPlayer = Context.Players[PlayerIndex];
+            int PlayerIndex = Context.GpFsm.CurPlayerIndex;
+            if (PlayerIndex == (int)EPlayerIndex.RealPlayerIndex)
+            {
+                // 把牌渲染到CardSession上
+                Player CurPlayer = Context.Players[PlayerIndex];
 
-            GameObject CardSessionObj = GameFramework.Instance.GetCardSessionObj();
-            CardSessionBehaviour CardSessionBehaviour = CardSessionObj.GetComponent<CardSessionBehaviour>();
-            CardSessionBehaviour.ShowCards(CurPlayer.CardList);
-
+                GameObject CardSessionObj = GameFramework.Instance.GetCardSessionObj();
+                CardSessionBehaviour CardSessionBehaviour = CardSessionObj.GetComponent<CardSessionBehaviour>();
+                CardSessionBehaviour.ShowCards(CurPlayer.CardList);
+            }
             return GameplayEventResult.GameplayEventResult_NeedSwitch;
         }
 
@@ -139,17 +157,36 @@ public class RoundingAction : GameplayAction
 {
     public override int OnEnter(GameplayContext Context)
     {
-        return base.OnEnter(Context);
+        base.OnEnter(Context);
+        GameplayStatus GpCurStatus = GetCurStatus(Context);
+        GpCurStatus.StartTime = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds();
+        GpCurStatus.TimeoutTime = GpCurStatus.StartTime + 60;
+        return 0;
     }
 
     public override GameplayEventResult OnEvent(GameplayContext Context, GameplayEvent GpEvent)
     {
         base.OnEvent(Context, GpEvent);
 
+        if (GpEvent.Type == GameplayEventType.GameplayEventType_EndRound)
+        {
+            return GameplayEventResult.GameplayEventResult_NeedSwitch;
+        }
+
+        if (GpEvent.Type == GameplayEventType.GameplayEventType_CheckFinishGame)
+        {
+            bool NeedFinishGame = GameFramework.Instance.GetBattleFieldObj().GetComponent<BattleFieldBehaviour>().NeedFinishGame();
+            if (NeedFinishGame)
+            {
+                return GameplayEventResult.GameplayEventResult_NeedSwitch;
+            }
+            return GameplayEventResult.GameplayEventResult_NoNeedSwitch;
+        }
+
         if (GpEvent.Type == GameplayEventType.GameplayEventType_ClickCard)
         {
             GameplayStatus GpCurStatus = GetCurStatus(Context);
-            Player CurPlayer = Context.Players[GpCurStatus.CurPlayerIndex];
+            Player CurPlayer = Context.Players[Context.GpFsm.CurPlayerIndex];
 
             if (CurPlayer.CardList[GpEvent.ClickCardEvent.PosX].CardId != 0)
             {
@@ -161,7 +198,7 @@ public class RoundingAction : GameplayAction
         if (GpEvent.Type == GameplayEventType.GameplayEventType_ClickTile)
         {
             GameplayStatus GpCurStatus = GetCurStatus(Context);
-            Player CurPlayer = Context.Players[GpCurStatus.CurPlayerIndex];
+            Player CurPlayer = Context.Players[Context.GpFsm.CurPlayerIndex];
 
             if (CurPlayer.ChooseCardPosX == -1 && CurPlayer.ChooseCardPosY == -1)
             {
@@ -195,7 +232,6 @@ public class RoundingAction : GameplayAction
                             {
                                 // 先去掉原位置的棋子，再加上新位置的棋子
                                 BattleFieldBehaviour.MoveTile(CurPlayer.ChooseBattleFileTilePosX, CurPlayer.ChooseBattleFileTilePosY, GpEvent.ClickTileEvent.PosX, GpEvent.ClickTileEvent.PosY);
-                                //BattleFieldBehaviour.GetTile(GpEvent.ClickTileEvent.PosX, GpEvent.ClickTileEvent.PosY);
                                 CurPlayer.ResetChooseBattleFieldTile();
                             }
                             else
@@ -205,15 +241,19 @@ public class RoundingAction : GameplayAction
                             }
                         }
                         // 新位置是己方，不可移动
-                        else if(NewMinion.PlayerId == OldMinion.PlayerId)
+                        else if (NewMinion.PlayerId == OldMinion.PlayerId)
                         {
                             Debug.Log(OldMinion.Name + " is blocked by " + NewMinion.Name);
                         }
                         // 新位置是敌方，战斗
                         else
                         {
-                            BattleFieldBehaviour.Combat(CurPlayer.ChooseBattleFileTilePosX, CurPlayer.ChooseBattleFileTilePosY, GpEvent.ClickTileEvent.PosX, GpEvent.ClickTileEvent.PosY);
-                            Debug.Log(OldMinion.Name + " fight with " + NewMinion.Name);
+                            if (OldMinion.RemainAction > 0)
+                            {
+                                BattleFieldBehaviour.Combat(CurPlayer.ChooseBattleFileTilePosX, CurPlayer.ChooseBattleFileTilePosY, GpEvent.ClickTileEvent.PosX, GpEvent.ClickTileEvent.PosY);
+                                CurPlayer.ResetChooseBattleFieldTile();
+                                Debug.Log(OldMinion.Name + " fight with " + NewMinion.Name);
+                            }
                         }
                     }
                     else
@@ -251,11 +291,52 @@ public class RoundingAction : GameplayAction
 
     public override int OnUpdate(GameplayContext Context)
     {
-        return base.OnUpdate(Context);
+        base.OnUpdate(Context);
+        GameplayStatus GpCurStatus = GetCurStatus(Context);
+        if (GpCurStatus.TimeoutTime < new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds())
+        {
+            // 超时
+            Context.GpFsm.ProcessEvent(Context, GameplayEventType.GameplayEventType_EndRound);
+            return 0;
+        }
+        // update
+        return 0;
     }
 }
 
 public class RoundEndAction : GameplayAction
+{
+    public override int OnEnter(GameplayContext Context)
+    {
+        base.OnEnter(Context);
+        Context.GpFsm.ProcessEvent(Context, GameplayEventType.GameplayEventType_NewRound);
+        return 0;
+    }
+
+    public override GameplayEventResult OnEvent(GameplayContext Context, GameplayEvent GpEvent)
+    {
+        base.OnEvent(Context, GpEvent);
+        if (GpEvent.Type == GameplayEventType.GameplayEventType_NewRound)
+        {
+            return GameplayEventResult.GameplayEventResult_NeedSwitch;
+        }
+        return GameplayEventResult.GameplayEventResult_NoNeedSwitch;
+    }
+
+    public override int OnUpdate(GameplayContext Context)
+    {
+        return base.OnUpdate(Context);
+    }
+
+    public override int OnExit(GameplayContext Context, GameplayEvent GpEvent)
+    {
+        Context.GpFsm.CurPlayerIndex = (Context.GpFsm.CurPlayerIndex + 1) % Context.Players.Count;
+        Debug.Log("cur player index -> " + Context.GpFsm.CurPlayerIndex);
+        return 0;
+    }
+}
+
+public class FinishGameAction : GameplayAction
 {
     public override int OnEnter(GameplayContext Context)
     {
@@ -274,10 +355,7 @@ public class RoundEndAction : GameplayAction
 
     public override int OnExit(GameplayContext Context, GameplayEvent GpEvent)
     {
-        GameplayStatus GpCurStatus = GetCurStatus(Context);
-        GpCurStatus.CurPlayerIndex = (GpCurStatus.CurPlayerIndex + 1) % Context.Players.Count;
-        Debug.Log("cur player index -> " + GpCurStatus.CurPlayerIndex);
-        return 0;
+        return base.OnExit(Context, GpEvent);
     }
 }
 
@@ -289,6 +367,7 @@ public class GameplayActionMgr : Singleton<GameplayActionMgr>
     private RoundStartAction roundStartAction = new RoundStartAction();
     private RoundingAction roundingAction = new RoundingAction();
     private RoundEndAction roundEndAction = new RoundEndAction();
+    private FinishGameAction finishGameAction = new FinishGameAction();
 
     private Dictionary<GameplayStatusType, GameplayAction> actionMap = new Dictionary<GameplayStatusType, GameplayAction>();
 
@@ -298,6 +377,7 @@ public class GameplayActionMgr : Singleton<GameplayActionMgr>
         actionMap.Add(GameplayStatusType.GameplayStatus_RoundStart, roundStartAction);
         actionMap.Add(GameplayStatusType.GameplayStatus_Rounding, roundingAction);
         actionMap.Add(GameplayStatusType.GameplayStatus_RoundEnd, roundEndAction);
+        actionMap.Add(GameplayStatusType.GameplayStatus_FinishGame, finishGameAction);
     }
 
     public GameplayAction GetAction(GameplayStatusType GpStatus)

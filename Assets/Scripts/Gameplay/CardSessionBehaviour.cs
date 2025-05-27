@@ -10,10 +10,12 @@ public class CardSessionBehaviour : MonoSingleton<CardSessionBehaviour>
     private const int cardMaxCount = 5;
     private const float edgeLength = 60.0f;
 
+    public static int CardMaxCount => cardMaxCount;
+
+
     // Start is called before the first frame update
     void Start()
     {
-        GenerateCardSession();
     }
 
     private GameObject InstantiateCard(int PosX, int PosY)
@@ -43,9 +45,9 @@ public class CardSessionBehaviour : MonoSingleton<CardSessionBehaviour>
 
         return Prefab;
     }
-    private void GenerateCardSession()
+    public void GenerateCardSession()
     {
-        for (int i = 0; i < cardMaxCount; i++)
+        for (int i = 0; i < CardMaxCount; i++)
         {
             InstantiateCard(i, 0);
         }
@@ -55,7 +57,7 @@ public class CardSessionBehaviour : MonoSingleton<CardSessionBehaviour>
     public void ShowCards(List<Card> CardList)
     {
         // 先把手牌区所有card清空
-        for (int i = 0; i < cardMaxCount; i++)
+        for (int i = 0; i < CardMaxCount; i++)
         {
             string Name = "Card-" + i + "-0";
             GameObject CardButton = GameFramework.DfsObj(GameFramework.Instance.StartPrefab.transform, Name).gameObject;
@@ -88,7 +90,7 @@ public class CardSessionBehaviour : MonoSingleton<CardSessionBehaviour>
         GameplayContext GpContext = BattleFieldBehaviour.GameplayContext;
         GameplayFsm GpFsm = BattleFieldBehaviour.GameplayFsm;
 
-        Player CurPlayer = GpContext.Players[GpFsm.GetCurStatus(GpContext).CurPlayerIndex];
+        Player CurPlayer = GpContext.Players[GpFsm.CurPlayerIndex];
         if (PosX + 1 > CurPlayer.CardList.Count)
         {
             return;

@@ -17,6 +17,7 @@ public class GameFramework : MonoSingleton<GameFramework>
 
         GameplayActionMgr.Instance.Init();
         Handbook.Instance.Init();
+        ConfigMgr.Instance.LoadFromJson();
     }
 
     public static Transform DfsObj(Transform Transform, string TargetName)

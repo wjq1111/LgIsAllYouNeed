@@ -8,6 +8,7 @@ public class GameplayContext
     private GameplayStatus roundStartStatus = new GameplayStatus();
     private GameplayStatus roundingStatus = new GameplayStatus();
     private GameplayStatus roundEndStatus = new GameplayStatus();
+    private GameplayStatus finishGameStatus = new GameplayStatus();
 
     private GameplayFsm gpFsm = new GameplayFsm();
 
@@ -27,17 +28,19 @@ public class GameplayContext
         roundStartStatus.GpType = GameplayStatusType.GameplayStatus_RoundStart;
         roundingStatus.GpType = GameplayStatusType.GameplayStatus_Rounding;
         roundEndStatus.GpType = GameplayStatusType.GameplayStatus_RoundEnd;
+        finishGameStatus.GpType = GameplayStatusType.GameplayStatus_FinishGame;
 
         gpStatusMap.Add(waitStartStatus.GpType, waitStartStatus);
         gpStatusMap.Add(roundStartStatus.GpType, roundStartStatus);
         gpStatusMap.Add(roundingStatus.GpType, roundingStatus);
         gpStatusMap.Add(roundEndStatus.GpType, roundEndStatus);
+        gpStatusMap.Add(finishGameStatus.GpType, finishGameStatus);
 
         // 只有两个玩家
         for (int i = 0; i < 2; i++)
         {
             Player MyPlayer = new Player();
-            MyPlayer.InitPlayer(i + 1);
+            MyPlayer.InitPlayer(i);
             Players.Add(MyPlayer);
         }
     }

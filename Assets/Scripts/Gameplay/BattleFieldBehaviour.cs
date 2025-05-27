@@ -11,13 +11,18 @@ public class BattleFieldBehaviour : MonoSingleton<BattleFieldBehaviour>
     private GameplayFsm gameplayFsm = new GameplayFsm();
     private GameplayContext gameplayContext = new GameplayContext();
     private Dictionary<int, Dictionary<int, GameObject>> buttonMap = new Dictionary<int, Dictionary<int, GameObject>>();
+
+    private GameObject dummy;
     public GameplayFsm GameplayFsm { get => gameplayFsm; set => gameplayFsm = value; }
     public GameplayContext GameplayContext { get => gameplayContext; set => gameplayContext = value; }
     public Dictionary<int, Dictionary<int, GameObject>> ButtonMap { get => buttonMap; set => buttonMap = value; }
+    public GameObject Dummy { get => dummy; set => dummy = value; }
+
 
     private const float edgeLength = 60.0f;
     private const int battleFieldMaxWidth = 8;
     private const int battleFieldMaxHeight = 5;
+
 
     // Start is called before the first frame update
     void Start()
@@ -27,9 +32,6 @@ public class BattleFieldBehaviour : MonoSingleton<BattleFieldBehaviour>
 
         GameplayFsm.Init(GameplayContext);
         GameplayContext.GpFsm = GameplayFsm;
-
-        GenerateBattleFieldTiles();
-        AddEnemy();
     }
 
     private GameObject InstantiateTile(int PosX, int PosY)
@@ -60,7 +62,7 @@ public class BattleFieldBehaviour : MonoSingleton<BattleFieldBehaviour>
     }
 
     // Generate the actual Hex-style map
-    private void GenerateBattleFieldTiles()
+    public void GenerateBattleFieldTiles()
     {
         for (int i = 0; i < battleFieldMaxWidth; i++)
         {
@@ -83,7 +85,7 @@ public class BattleFieldBehaviour : MonoSingleton<BattleFieldBehaviour>
 
     public bool CanReach(int PosX, int PosY, int ReachPosX, int ReachPosY)
     {
-        List<Tuple<int, int>> ReachTuple = Reach(PosX, PosY, 2);
+        List<Tuple<int, int>> ReachTuple = Reach(PosX, PosY, 1);
         Debug.Log("PosX:" + PosX + " PosY:" + PosY + " ReachPosX:" + ReachPosX + " ReachPosY:" + ReachPosY + " ReachTuple:" + ReachTuple.ToShortString());
         foreach (Tuple<int, int> Pos in ReachTuple)
         {
@@ -174,51 +176,72 @@ public class BattleFieldBehaviour : MonoSingleton<BattleFieldBehaviour>
 
         GameObject dfsrTile = GetTile(dfsrPosX, dfsrPosY);
         Minion dfsr = dfsrTile.GetComponent<BattleFieldTileBehaviour>().Minion;
+
+        atkr.RemainAction -= 1;
         // 攻击
-        if(atkr.Attack > dfsr.Defense)
+        if (atkr.Attack > dfsr.Defense)
         {
             dfsr.Hitpoint -= atkr.Attack - dfsr.Defense;
-            atkr.RemainAction -= 1;
             if (dfsr.Hitpoint < 0)
             {
-                // dfsr.die(int killer)
-                dfsr = null;
-                dfsrTile.GetComponentInChildren<TMP_Text>().SetText(dfsrPosX + "-" + dfsrPosY);
+                RemoveTileMinion(dfsrPosX, dfsrPosY);
                 return;
             }
             Debug.Log(dfsr.Name + " lose " + (atkr.Attack - dfsr.Defense).ToString() + " hitpoint(s) ");
         }
-        // 反击？
-        if(dfsr.Attack > atkr.Defense)
+        // 反击
+        if (dfsr.Attack > atkr.Defense)
         {
             atkr.Hitpoint -= dfsr.Attack - atkr.Defense;
             if (atkr.Hitpoint < 0)
             {
                 // atkr.die(int killer)
-                atkr = null;
-                atkrTile.GetComponentInChildren<TMP_Text>().SetText(atkrPosX + "-" + atkrPosY);
+                RemoveTileMinion(atkrPosX, atkrPosY);
                 return;
             }
             Debug.Log(atkr.Name + " lose " + (dfsr.Attack - atkr.Defense).ToString() + " hitpoint(s) ");
         }
     }
+
+    public bool NeedFinishGame()
+    {
+        if (Dummy == null)
+        {
+            return true;
+        }
+        if (Dummy.GetComponent<BattleFieldTileBehaviour>() == null)
+        {
+            return true;
+        }
+        if (Dummy.GetComponent<BattleFieldTileBehaviour>().Minion == null)
+        {
+            return true;
+        }
+        if (Dummy.GetComponent<BattleFieldTileBehaviour>().Minion.Hitpoint <= 0)
+        {
+            return true;
+        }
+        // 自己死了
+
+        return false;
+    }
+
     public void AddEnemy()
     {
         // Should have been pre-configured in map.
         Minion CardMinion = new Minion();
         CardMinion.Attack = 0;
         CardMinion.Defense = 0;
-        CardMinion.Hitpoint = 100;
+        CardMinion.Hitpoint = 1000;
         CardMinion.Name = "LGSB";
         CardMinion.RemainAction = 1;
         CardMinion.MaxAction = 1;
         CardMinion.RemainMovement = 0;
         CardMinion.MaxMovement = 0;
-        CardMinion.PlayerId = 2;
-        GameObject Dummy = GetTile(5, 2);
+        CardMinion.PlayerId = (int)EPlayerIndex.EnemyPlayerIndex;
+        Dummy = GetTile(5, 2);
 
         Dummy.GetComponent<BattleFieldTileBehaviour>().Minion = CardMinion;
-
         Dummy.GetComponentInChildren<TMP_Text>().SetText(CardMinion.Name);
     }
     public void AddTile(int PlayerChooseCardX, int PlayerChooseCardY, int PosX, int PosY)
@@ -230,7 +253,7 @@ public class BattleFieldBehaviour : MonoSingleton<BattleFieldBehaviour>
 
         GameObject Tile = GetTile(PosX, PosY);
 
-        Player CurPlayer = GameplayContext.Players[GameplayFsm.GetCurStatus(GameplayContext).CurPlayerIndex];
+        Player CurPlayer = GameplayContext.Players[GameplayFsm.CurPlayerIndex];
         // TODO 如果以后变成了两排，需要注意
         Card ChooseCard = CurPlayer.CardList[PlayerChooseCardX];
 
