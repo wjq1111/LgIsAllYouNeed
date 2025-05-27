@@ -14,11 +14,12 @@ public class CardDeck : Singleton<CardDeck>
     public List<Card> Cards { get => cards; set => cards = value; }
     public List<Card> UsedCards { get => usedCards; set => usedCards = value; }
 
-    public void Init(List<Card> CardList)
+    public void Init(List<Card> CardList, int PlayerId)
     {
         // 加入player的已解锁的牌
         foreach (Card MyCard in CardList)
         {
+            MyCard.PlayerId = PlayerId;
             Cards.Add(MyCard);
         }
     }

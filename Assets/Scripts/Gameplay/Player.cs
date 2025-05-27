@@ -1,9 +1,11 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Windows.WebCam;
 
 public class Player
 {
+    private int playerId = 0;
     private List<Card> cardList = new List<Card> ();
 
     // 玩家现在选择了哪一张手牌
@@ -19,10 +21,11 @@ public class Player
     public int ChooseCardPosY { get => chooseCardPosY; set => chooseCardPosY = value; }
     public int ChooseBattleFileTilePosX { get => chooseBattleFileTilePosX; set => chooseBattleFileTilePosX = value; }
     public int ChooseBattleFileTilePosY { get => chooseBattleFileTilePosY; set => chooseBattleFileTilePosY = value; }
+    public int PlayerId { get => playerId; set => playerId = value; }
 
-    public void InitPlayer()
+    public void InitPlayer(int playerId)
     {
-        
+        PlayerId = playerId;
     }
 
     public void ResetChooseCard()

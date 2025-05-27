@@ -12,6 +12,8 @@ using UnityEngine.UIElements;
 
 public class Card
 {
+    private int playerId = 0;
+
     private int cardId = 0;
     private int gid = 0;
     private string name = "default card";
@@ -23,6 +25,7 @@ public class Card
     public int Gid { get => gid; set => gid = value; }
     public string Name { get => name; set => name = value; }
     public List<BaseEffect> CardEffect { get => cardEffect; set => cardEffect = value; }
+    public int PlayerId { get => playerId; set => playerId = value; }
 
     public void Init(string Name, List<BaseEffect> cardEffect)
     {

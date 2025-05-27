@@ -17,7 +17,7 @@ public class BattleFieldBehaviour : MonoSingleton<BattleFieldBehaviour>
 
     private const float edgeLength = 60.0f;
     private const int battleFieldMaxWidth = 8;
-    private const int battleFieldMaxHeight = 3;
+    private const int battleFieldMaxHeight = 5;
 
     // Start is called before the first frame update
     void Start()
@@ -29,6 +29,7 @@ public class BattleFieldBehaviour : MonoSingleton<BattleFieldBehaviour>
         GameplayContext.GpFsm = GameplayFsm;
 
         GenerateBattleFieldTiles();
+        AddEnemy();
     }
 
     private GameObject InstantiateTile(int PosX, int PosY)
@@ -82,7 +83,7 @@ public class BattleFieldBehaviour : MonoSingleton<BattleFieldBehaviour>
 
     public bool CanReach(int PosX, int PosY, int ReachPosX, int ReachPosY)
     {
-        List<Tuple<int, int>> ReachTuple = Reach(PosX, PosY, 1);
+        List<Tuple<int, int>> ReachTuple = Reach(PosX, PosY, 2);
         Debug.Log("PosX:" + PosX + " PosY:" + PosY + " ReachPosX:" + ReachPosX + " ReachPosY:" + ReachPosY + " ReachTuple:" + ReachTuple.ToShortString());
         foreach (Tuple<int, int> Pos in ReachTuple)
         {
@@ -115,7 +116,7 @@ public class BattleFieldBehaviour : MonoSingleton<BattleFieldBehaviour>
         }
         for (int i = 1; i <= radius; i++)
         {
-            if (y % 2 == 1)
+            if ((y - i) % 2 == 0)
             {
                 Llimit++;
             }
@@ -156,7 +157,7 @@ public class BattleFieldBehaviour : MonoSingleton<BattleFieldBehaviour>
     {
         GameObject OldTile = GetTile(OldPosX, OldPosY);
         Minion OldMinion = OldTile.GetComponent<BattleFieldTileBehaviour>().Minion;
-        OldMinion.RemainAction -= 1;
+        OldMinion.RemainMovement -= 1;
 
         GameObject NewTile = GetTile(PosX, PosY);
         NewTile.GetComponent<BattleFieldTileBehaviour>().Minion = new Minion();
@@ -166,6 +167,60 @@ public class BattleFieldBehaviour : MonoSingleton<BattleFieldBehaviour>
         RemoveTileMinion(OldPosX, OldPosY);
     }
 
+    public void Combat(int atkrPosX, int atkrPosY, int dfsrPosX, int dfsrPosY)
+    {
+        GameObject atkrTile = GetTile(atkrPosX, atkrPosY);
+        Minion atkr = atkrTile.GetComponent<BattleFieldTileBehaviour>().Minion;
+
+        GameObject dfsrTile = GetTile(dfsrPosX, dfsrPosY);
+        Minion dfsr = dfsrTile.GetComponent<BattleFieldTileBehaviour>().Minion;
+        // ¹¥»÷
+        if(atkr.Attack > dfsr.Defense)
+        {
+            dfsr.Hitpoint -= atkr.Attack - dfsr.Defense;
+            atkr.RemainAction -= 1;
+            if (dfsr.Hitpoint < 0)
+            {
+                // dfsr.die(int killer)
+                dfsr = null;
+                dfsrTile.GetComponentInChildren<TMP_Text>().SetText(dfsrPosX + "-" + dfsrPosY);
+                return;
+            }
+            Debug.Log(dfsr.Name + " lose " + (atkr.Attack - dfsr.Defense).ToString() + " hitpoint(s) ");
+        }
+        // ·´»÷£¿
+        if(dfsr.Attack > atkr.Defense)
+        {
+            atkr.Hitpoint -= dfsr.Attack - atkr.Defense;
+            if (atkr.Hitpoint < 0)
+            {
+                // atkr.die(int killer)
+                atkr = null;
+                atkrTile.GetComponentInChildren<TMP_Text>().SetText(atkrPosX + "-" + atkrPosY);
+                return;
+            }
+            Debug.Log(atkr.Name + " lose " + (dfsr.Attack - atkr.Defense).ToString() + " hitpoint(s) ");
+        }
+    }
+    public void AddEnemy()
+    {
+        // Should have been pre-configured in map.
+        Minion CardMinion = new Minion();
+        CardMinion.Attack = 0;
+        CardMinion.Defense = 0;
+        CardMinion.Hitpoint = 100;
+        CardMinion.Name = "LGSB";
+        CardMinion.RemainAction = 1;
+        CardMinion.MaxAction = 1;
+        CardMinion.RemainMovement = 0;
+        CardMinion.MaxMovement = 0;
+        CardMinion.PlayerId = 2;
+        GameObject Dummy = GetTile(5, 2);
+
+        Dummy.GetComponent<BattleFieldTileBehaviour>().Minion = CardMinion;
+
+        Dummy.GetComponentInChildren<TMP_Text>().SetText(CardMinion.Name);
+    }
     public void AddTile(int PlayerChooseCardX, int PlayerChooseCardY, int PosX, int PosY)
     {
         if (PlayerChooseCardX == -1 || PlayerChooseCardY == -1)
@@ -186,8 +241,11 @@ public class BattleFieldBehaviour : MonoSingleton<BattleFieldBehaviour>
         CardMinion.Defense = 1;
         CardMinion.Hitpoint = 1;
         CardMinion.Name = "lmh a"+ CardId+"-d1-h1";
-        CardMinion.RemainAction = 3;
-        CardMinion.MaxAction = 3;
+        CardMinion.RemainAction = 1;
+        CardMinion.MaxAction = 1;
+        CardMinion.RemainMovement = 3;
+        CardMinion.MaxMovement = 3;
+        CardMinion.PlayerId = ChooseCard.PlayerId;
         Tile.GetComponent<BattleFieldTileBehaviour>().Minion = CardMinion;
 
         Tile.GetComponentInChildren<TMP_Text>().SetText(CardMinion.Name);

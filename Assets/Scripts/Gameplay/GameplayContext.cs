@@ -37,7 +37,7 @@ public class GameplayContext
         for (int i = 0; i < 2; i++)
         {
             Player MyPlayer = new Player();
-            MyPlayer.InitPlayer();
+            MyPlayer.InitPlayer(i + 1);
             Players.Add(MyPlayer);
         }
     }

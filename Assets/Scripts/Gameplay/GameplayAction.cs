@@ -79,20 +79,20 @@ public class RoundStartAction : GameplayAction
     public override int OnEnter(GameplayContext Context)
     {
         base.OnEnter(Context);
-
-        CardDeck.Instance.Init(Handbook.Instance.UnlockedCards);
-
         GameplayStatus GpCurStatus = GetCurStatus(Context);
         GpCurStatus.StartTime = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds();
         GpCurStatus.TimeoutTime = GpCurStatus.StartTime + 2;
-
-        // 系统发牌，直接加到player手牌
-        List<Card> CardList = CardDeck.Instance.DrawCards(GameFramework.Instance.CardNumPerRound);
         if (GpCurStatus.CurPlayerIndex > Context.Players.Count)
         {
             Debug.LogError("cur player index invalid " + GpCurStatus.CurPlayerIndex);
             return -1;
         }
+
+        CardDeck.Instance.Init(Handbook.Instance.UnlockedCards, Context.Players[GpCurStatus.CurPlayerIndex].PlayerId);
+        
+        // 系统发牌，直接加到player手牌
+        List<Card> CardList = CardDeck.Instance.DrawCards(GameFramework.Instance.CardNumPerRound);
+
         Context.Players[GpCurStatus.CurPlayerIndex].AddCard(CardList);
 
         GameplayEvent GpEvent = new GameplayEvent();
@@ -181,21 +181,44 @@ public class RoundingAction : GameplayAction
                     Minion OldMinion = OldChooseTile.GetComponent<BattleFieldTileBehaviour>().Minion;
                     if (OldMinion == null)
                     {
+                        // 空选，当做没选
                         CurPlayer.ChooseBattleFileTilePosX = GpEvent.ClickTileEvent.PosX;
                         CurPlayer.ChooseBattleFileTilePosY = GpEvent.ClickTileEvent.PosY;
                     }
                     else if (BattleFieldBehaviour.CanReach(CurPlayer.ChooseBattleFileTilePosX, CurPlayer.ChooseBattleFileTilePosY, GpEvent.ClickTileEvent.PosX, GpEvent.ClickTileEvent.PosY))
                     {
-                        if (OldMinion.RemainAction > 0)
+                        // 两位置之间的距离合法，且新位置没有怪物
+                        Minion NewMinion = BattleFieldBehaviour.GetTile(GpEvent.ClickTileEvent.PosX, GpEvent.ClickTileEvent.PosY).GetComponent<BattleFieldTileBehaviour>().Minion;
+                        if (NewMinion == null)
                         {
-                            // 先去掉原位置的棋子，再加上新位置的棋子
-                            BattleFieldBehaviour.MoveTile(CurPlayer.ChooseBattleFileTilePosX, CurPlayer.ChooseBattleFileTilePosY, GpEvent.ClickTileEvent.PosX, GpEvent.ClickTileEvent.PosY);
-                            BattleFieldBehaviour.GetTile(GpEvent.ClickTileEvent.PosX, GpEvent.ClickTileEvent.PosY);
-                            CurPlayer.ResetChooseBattleFieldTile();
+                            if (OldMinion.RemainMovement > 0)
+                            {
+                                // 先去掉原位置的棋子，再加上新位置的棋子
+                                BattleFieldBehaviour.MoveTile(CurPlayer.ChooseBattleFileTilePosX, CurPlayer.ChooseBattleFileTilePosY, GpEvent.ClickTileEvent.PosX, GpEvent.ClickTileEvent.PosY);
+                                //BattleFieldBehaviour.GetTile(GpEvent.ClickTileEvent.PosX, GpEvent.ClickTileEvent.PosY);
+                                CurPlayer.ResetChooseBattleFieldTile();
+                            }
+                            else
+                            {
+                                // 行动力不足，暂时打个日志，理想状态应该是提示一下
+                                Debug.Log(OldMinion.Name + " cannot move ");
+                            }
+                        }
+                        // 新位置是己方，不可移动
+                        else if(NewMinion.PlayerId == OldMinion.PlayerId)
+                        {
+                            Debug.Log(OldMinion.Name + " is blocked by " + NewMinion.Name);
+                        }
+                        // 新位置是敌方，战斗
+                        else
+                        {
+                            BattleFieldBehaviour.Combat(CurPlayer.ChooseBattleFileTilePosX, CurPlayer.ChooseBattleFileTilePosY, GpEvent.ClickTileEvent.PosX, GpEvent.ClickTileEvent.PosY);
+                            Debug.Log(OldMinion.Name + " fight with " + NewMinion.Name);
                         }
                     }
                     else
                     {
+                        // 两者之间的距离不合法，无法移动
                         CurPlayer.ChooseBattleFileTilePosX = GpEvent.ClickTileEvent.PosX;
                         CurPlayer.ChooseBattleFileTilePosY = GpEvent.ClickTileEvent.PosY;
                     }
