@@ -228,19 +228,22 @@ public class BattleFieldBehaviour : MonoSingleton<BattleFieldBehaviour>
 
     public void AddEnemy()
     {
-        // Should have been pre-configured in map.
-        Minion CardMinion = new Minion();
-        CardMinion.Attack = 0;
-        CardMinion.Defense = 0;
-        CardMinion.Hitpoint = 1000;
-        CardMinion.Name = "LGSB";
-        CardMinion.RemainAction = 1;
-        CardMinion.MaxAction = 1;
-        CardMinion.RemainMovement = 0;
-        CardMinion.MaxMovement = 0;
-        CardMinion.PlayerId = (int)EPlayerIndex.EnemyPlayerIndex;
-        Dummy = GetTile(5, 2);
+        // TODO 现在只有一关
+        int CurStageId = 1;
+        StageConfigItem StageConfigItem = ConfigMgr.Instance.StageConfig.StageConfigMap[CurStageId];
+        MinionConfigItem MinionConfigItem = ConfigMgr.Instance.MinionConfig.MinionConfigMap[StageConfigItem.BossMinionId];
 
+        Minion CardMinion = new Minion();
+        CardMinion.Attack = MinionConfigItem.Attack;
+        CardMinion.Defense = MinionConfigItem.Defense;
+        CardMinion.Hitpoint = MinionConfigItem.HitPoint;
+        CardMinion.Name = MinionConfigItem.Name;
+        CardMinion.RemainAction = MinionConfigItem.BaseAction;
+        CardMinion.MaxAction = MinionConfigItem.BaseAction;
+        CardMinion.RemainMovement = MinionConfigItem.BaseMovement;
+        CardMinion.MaxMovement = MinionConfigItem.BaseMovement;
+        CardMinion.PlayerId = (int)EPlayerIndex.EnemyPlayerIndex;
+        Dummy = GetTile(StageConfigItem.TilePosX, StageConfigItem.TilePosY);
         Dummy.GetComponent<BattleFieldTileBehaviour>().Minion = CardMinion;
         Dummy.GetComponentInChildren<TMP_Text>().SetText(CardMinion.Name);
     }

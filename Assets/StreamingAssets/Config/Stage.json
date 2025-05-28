@@ -1,0 +1,10 @@
+{
+    "stages": [
+        {
+            "StageId": 1,
+            "BossMinionId": 1,
+            "TilePosX": 5,
+            "TilePosY": 2
+        }
+    ]
+}

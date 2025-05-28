@@ -80,6 +80,7 @@
     <Compile Include="Assets\Scripts\Gameplay\GameplayFsm.cs" />
     <Compile Include="Assets\Scripts\Config\ConfigMgr.cs" />
     <Compile Include="Assets\Scripts\Gameplay\CardBehaviour.cs" />
+    <Compile Include="Assets\Scripts\Config\StageConfig.cs" />
     <Compile Include="Assets\Scripts\Gameplay\GameplayAction.cs" />
     <Compile Include="Assets\Scripts\GameFramework.cs" />
   </ItemGroup>

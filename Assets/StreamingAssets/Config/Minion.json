@@ -1,12 +1,22 @@
 {
-  "minions": [
-    {
-        "id": 1,
-        "name": "我是Rookie关"
-    },
-    {
-        "id": 2,
-        "name": "我是正式关"
-    }
-  ]
+    "minions": [
+        {
+            "MinionId": 1,
+            "Name": "lg's efls",
+            "Attack": 0,
+            "Defense": 1,
+            "HitPoint": 10,
+            "BaseAction": 1,
+            "BaseMovement": 2
+        },
+        {
+            "MinionId": 2,
+            "Name": "lg's joker",
+            "Attack": 1,
+            "Defense": 1,
+            "HitPoint": 10,
+            "BaseAction": 1,
+            "BaseMovement": 2
+        }
+    ]
 }

@@ -3,12 +3,25 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.IO;
 using UnityEngine.Serialization;
+using System.ComponentModel;
 
 [System.Serializable]
 public class MinionConfigItem
 {
-    public int id;
-    public string name;
+    // 随从id，需要有，比如在关卡编辑的配置中需要用到这个为key
+    public int MinionId;
+    // 名字
+    public string Name;
+    // 攻击力
+    public int Attack;
+    // 防御力
+    public int Defense;
+    // 生命值
+    public int HitPoint;
+    // 基础行动力
+    public int BaseAction;
+    // 基础移动力
+    public int BaseMovement;
 }
 
 [System.Serializable]
@@ -30,14 +43,8 @@ public class MinionConfig
 
         foreach (MinionConfigItem item in minions)
         {
-            MinionConfigMap.Add(item.id, item);
+            MinionConfigMap.Add(item.MinionId, item);
         }
         _mapsInitialize = true;
-
-        foreach (var item in MinionConfigMap)
-        {
-            Debug.Log(item.Key + ": " + item.Value.id + " + " + item.Value.name);
-        }
     }
-
 }

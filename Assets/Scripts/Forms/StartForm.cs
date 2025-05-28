@@ -37,7 +37,7 @@ public class StartForm : MonoSingleton<StartForm>
 
     public void OnChoiceSelected(int ChoiceIndex)
     {
-        Debug.Log(ConfigMgr.Instance.MinionConfig.MinionConfigMap[1].name);
+        Debug.Log(ConfigMgr.Instance.MinionConfig.MinionConfigMap[1].Name);
 
         BattleFieldBehaviour BattleFieldBehaviour = (BattleFieldBehaviour)BattleField.GetComponent<BattleFieldBehaviour>();
         if (ChoiceIndex == 0)
