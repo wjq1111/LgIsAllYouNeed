@@ -4,7 +4,19 @@
             "StageId": 1,
             "BossMinionId": 1,
             "TilePosX": 5,
-            "TilePosY": 2
+            "TilePosY": 2,
+            "enemyMinions": [
+                {
+                    "MinionId": 2,
+                    "TilePosX": 5,
+                    "TilePosY": 1
+                },
+                {
+                    "MinionId": 2,
+                    "TilePosX": 5,
+                    "TilePosY": 3
+                }
+            ]
         }
     ]
 }

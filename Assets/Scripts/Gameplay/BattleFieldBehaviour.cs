@@ -246,6 +246,14 @@ public class BattleFieldBehaviour : MonoSingleton<BattleFieldBehaviour>
         Dummy = GetTile(StageConfigItem.TilePosX, StageConfigItem.TilePosY);
         Dummy.GetComponent<BattleFieldTileBehaviour>().Minion = CardMinion;
         Dummy.GetComponentInChildren<TMP_Text>().SetText(CardMinion.Name);
+        foreach (EnemyMinion enemy in StageConfigItem.EnemyMinions)
+        {
+            Minion minion = new Minion();
+            minion.ReadMinion(enemy.MinionId, (int)EPlayerIndex.EnemyPlayerIndex);
+            GameObject enemyTile = GetTile(enemy.TilePosX, enemy.TilePosY);
+            enemyTile.GetComponent<BattleFieldTileBehaviour>().Minion = minion;
+            enemyTile.GetComponentInChildren<TMP_Text>().SetText(minion.Name);
+        }
     }
     public void AddTile(int PlayerChooseCardX, int PlayerChooseCardY, int PosX, int PosY)
     {

@@ -6,6 +6,14 @@ using UnityEngine.Serialization;
 using System.ComponentModel;
 
 [System.Serializable]
+public class EnemyMinion
+{
+    public int MinionId;
+    public int TilePosX;
+    public int TilePosY;
+}
+
+[System.Serializable]
 public class StageConfigItem
 {
     // 关卡id
@@ -15,6 +23,7 @@ public class StageConfigItem
     // boss的怪在哪里
     public int TilePosX;
     public int TilePosY;
+    public List<EnemyMinion> EnemyMinions;
 }
 
 [System.Serializable]

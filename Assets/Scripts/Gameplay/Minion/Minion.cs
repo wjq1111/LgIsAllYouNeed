@@ -65,4 +65,20 @@ public class Minion
         MaxMovement = NewMinion.MaxMovement;
         PlayerId = NewMinion.PlayerId;
     }
+
+    // TODO: Utility.cs
+    public void ReadMinion(int minionId, int playerId)
+    {
+        MinionConfigItem MinionConfigItem = ConfigMgr.Instance.MinionConfig.MinionConfigMap[minionId];
+
+        Attack = MinionConfigItem.Attack;
+        Defense = MinionConfigItem.Defense;
+        Hitpoint = MinionConfigItem.HitPoint;
+        Name = MinionConfigItem.Name;
+        RemainAction = MinionConfigItem.BaseAction;
+        MaxAction = MinionConfigItem.BaseAction;
+        RemainMovement = MinionConfigItem.BaseMovement;
+        MaxMovement = MinionConfigItem.BaseMovement;
+        PlayerId = playerId;
+    }
 }
