@@ -1,11 +1,11 @@
 {
-    "stages": [
+    "Stages": [
         {
             "StageId": 1,
             "BossMinionId": 1,
             "TilePosX": 5,
             "TilePosY": 2,
-            "enemyMinions": [
+            "EnemyMinions": [
                 {
                     "MinionId": 2,
                     "TilePosX": 5,

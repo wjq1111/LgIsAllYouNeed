@@ -1,0 +1,14 @@
+{
+    "Effects": [
+        {
+            "EffectId": 1,
+            "EffectType": 1,
+            "MinionId": 3
+        },
+        {
+            "EffectId": 2,
+            "EffectType": 1,
+            "MinionId": 4
+        }
+    ]
+}

@@ -4,18 +4,19 @@ using System.Collections.Generic;
 using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Purchasing;
 using UnityEngine.UI;
 
 public class BattleFieldBehaviour : MonoSingleton<BattleFieldBehaviour>
 {
     private GameplayFsm gameplayFsm = new GameplayFsm();
     private GameplayContext gameplayContext = new GameplayContext();
-    private Dictionary<int, Dictionary<int, GameObject>> buttonMap = new Dictionary<int, Dictionary<int, GameObject>>();
+    private Dictionary<int, Dictionary<int, GameObject>> tileMap = new Dictionary<int, Dictionary<int, GameObject>>();
 
     private GameObject dummy;
     public GameplayFsm GameplayFsm { get => gameplayFsm; set => gameplayFsm = value; }
     public GameplayContext GameplayContext { get => gameplayContext; set => gameplayContext = value; }
-    public Dictionary<int, Dictionary<int, GameObject>> ButtonMap { get => buttonMap; set => buttonMap = value; }
+    public Dictionary<int, Dictionary<int, GameObject>> TileMap { get => tileMap; set => tileMap = value; }
     public GameObject Dummy { get => dummy; set => dummy = value; }
 
 
@@ -69,15 +70,15 @@ public class BattleFieldBehaviour : MonoSingleton<BattleFieldBehaviour>
             for (int j = 0; j < battleFieldMaxHeight; j++)
             {
                 GameObject Prefab = InstantiateTile(i, j);
-                if (ButtonMap.ContainsKey(i) == false)
+                if (TileMap.ContainsKey(i) == false)
                 {
                     Dictionary<int, GameObject> Pairs = new Dictionary<int, GameObject>();
                     Pairs.Add(j, Prefab);
-                    ButtonMap.Add(i, Pairs);
+                    TileMap.Add(i, Pairs);
                 }
                 else
                 {
-                    ButtonMap[i].Add(j, Prefab);
+                    TileMap[i].Add(j, Prefab);
                 }
             }
         }
@@ -166,6 +167,8 @@ public class BattleFieldBehaviour : MonoSingleton<BattleFieldBehaviour>
         NewTile.GetComponent<BattleFieldTileBehaviour>().Minion.Copy(OldMinion);
         NewTile.GetComponentInChildren<TMP_Text>().SetText(OldMinion.Name);
 
+        GameFramework.Instance.BattleLog(OldMinion.Name + " moves from ("+ OldPosX + ", " + OldPosY + ") To (" + PosX + ", " + PosY + ")");
+
         RemoveTileMinion(OldPosX, OldPosY);
     }
 
@@ -178,29 +181,45 @@ public class BattleFieldBehaviour : MonoSingleton<BattleFieldBehaviour>
         Minion dfsr = dfsrTile.GetComponent<BattleFieldTileBehaviour>().Minion;
 
         atkr.RemainAction -= 1;
-        // 攻击
-        if (atkr.Attack > dfsr.Defense)
+
+        do
         {
-            dfsr.Hitpoint -= atkr.Attack - dfsr.Defense;
-            if (dfsr.Hitpoint < 0)
+            // 攻击
+            if (atkr.Attack >= dfsr.Defense)
             {
-                RemoveTileMinion(dfsrPosX, dfsrPosY);
-                return;
+                if (atkr.Attack == dfsr.Defense)
+                {
+                    GameFramework.Instance.BattleLog(dfsr.Name + " lose " + (atkr.Attack - dfsr.Defense).ToString() + " hitpoint(s)!");
+                    break;
+                }
+                dfsr.Hitpoint -= atkr.Attack - dfsr.Defense;
+                GameFramework.Instance.BattleLog(dfsr.Name + " lose " + (atkr.Attack - dfsr.Defense).ToString() + " hitpoint(s)!");
+                if (dfsr.Hitpoint < 0)
+                {
+                    RemoveTileMinion(dfsrPosX, dfsrPosY);
+                    GameFramework.Instance.BattleLog(dfsr.Name + " dead!");
+                    break;
+                }
             }
-            Debug.Log(dfsr.Name + " lose " + (atkr.Attack - dfsr.Defense).ToString() + " hitpoint(s) ");
-        }
-        // 反击
-        if (dfsr.Attack > atkr.Defense)
-        {
-            atkr.Hitpoint -= dfsr.Attack - atkr.Defense;
-            if (atkr.Hitpoint < 0)
+            // 反击
+            if (dfsr.Attack >= atkr.Defense)
             {
-                // atkr.die(int killer)
-                RemoveTileMinion(atkrPosX, atkrPosY);
-                return;
+                if (dfsr.Attack == atkr.Defense)
+                {
+                    GameFramework.Instance.BattleLog(atkr.Name + " lose " + (dfsr.Attack - atkr.Defense).ToString() + " hitpoint(s)!");
+                    break;
+                }
+                atkr.Hitpoint -= dfsr.Attack - atkr.Defense;
+                GameFramework.Instance.BattleLog(atkr.Name + " lose " + (dfsr.Attack - atkr.Defense).ToString() + " hitpoint(s)!");
+                if (atkr.Hitpoint < 0)
+                {
+                    // atkr.die(int killer)
+                    RemoveTileMinion(atkrPosX, atkrPosY);
+                    GameFramework.Instance.BattleLog(atkr.Name + " dead!");
+                    break;
+                }
             }
-            Debug.Log(atkr.Name + " lose " + (dfsr.Attack - atkr.Defense).ToString() + " hitpoint(s) ");
-        }
+        } while (false);
     }
 
     public bool NeedFinishGame()
@@ -246,14 +265,19 @@ public class BattleFieldBehaviour : MonoSingleton<BattleFieldBehaviour>
         Dummy = GetTile(StageConfigItem.TilePosX, StageConfigItem.TilePosY);
         Dummy.GetComponent<BattleFieldTileBehaviour>().Minion = CardMinion;
         Dummy.GetComponentInChildren<TMP_Text>().SetText(CardMinion.Name);
+
+        GameFramework.Instance.BattleLog(CardMinion.Name + " arrived!");
         foreach (EnemyMinion enemy in StageConfigItem.EnemyMinions)
         {
             Minion minion = new Minion();
-            minion.ReadMinion(enemy.MinionId, (int)EPlayerIndex.EnemyPlayerIndex);
+            minion.InitByMinionConfig(enemy.MinionId, (int)EPlayerIndex.EnemyPlayerIndex);
             GameObject enemyTile = GetTile(enemy.TilePosX, enemy.TilePosY);
             enemyTile.GetComponent<BattleFieldTileBehaviour>().Minion = minion;
             enemyTile.GetComponentInChildren<TMP_Text>().SetText(minion.Name);
+
+            GameFramework.Instance.BattleLog(minion.Name + " arrived!");
         }
+
     }
     public void AddTile(int PlayerChooseCardX, int PlayerChooseCardY, int PosX, int PosY)
     {
@@ -267,37 +291,40 @@ public class BattleFieldBehaviour : MonoSingleton<BattleFieldBehaviour>
         Player CurPlayer = GameplayContext.Players[GameplayFsm.CurPlayerIndex];
         // TODO 如果以后变成了两排，需要注意
         Card ChooseCard = CurPlayer.CardList[PlayerChooseCardX];
+        // 这张卡的召唤属性已经被记录到卡上了，所以Minion在生成的时候需要用Card的生成，不能再读配置
+        // 如果有一些永久加成的属性加到卡上（本局游戏/本次存档），直接改玩家的手牌
+        foreach (BaseEffect CardEffect in ChooseCard.CardEffect)
+        {
+            if (CardEffect.EffectType == EffectType.EffectType_Summon)
+            {
+                SummonEffect SummonEffect = (SummonEffect)CardEffect;
+                Minion CardMinion = new Minion();
+                CardMinion.InitBySummonEffect(SummonEffect, ChooseCard.PlayerId);
+                Tile.GetComponent<BattleFieldTileBehaviour>().Minion = CardMinion;
+                Tile.GetComponentInChildren<TMP_Text>().SetText(CardMinion.Name);
 
-        // TODO 配置
-        int CardId = ChooseCard.CardId;
-        Minion CardMinion = new Minion();
-        CardMinion.Attack = CardId;
-        CardMinion.Defense = 1;
-        CardMinion.Hitpoint = 1;
-        CardMinion.Name = "lmh a"+ CardId+"-d1-h1";
-        CardMinion.RemainAction = 1;
-        CardMinion.MaxAction = 1;
-        CardMinion.RemainMovement = 3;
-        CardMinion.MaxMovement = 3;
-        CardMinion.PlayerId = ChooseCard.PlayerId;
-        Tile.GetComponent<BattleFieldTileBehaviour>().Minion = CardMinion;
-
-        Tile.GetComponentInChildren<TMP_Text>().SetText(CardMinion.Name);
+                GameFramework.Instance.BattleLog(CardMinion.Name + " arrived!");
+            }
+            else
+            {
+                // TODO
+            }
+        }
     }
 
     public GameObject GetTile(int PosX, int PosY)
     {
-        if (ButtonMap.ContainsKey(PosX) == false)
+        if (TileMap.ContainsKey(PosX) == false)
         {
             Debug.LogError("tile not find" + PosX + " " + PosY);
             return null;
         }
-        if (ButtonMap[PosX].ContainsKey(PosY) == false)
+        if (TileMap[PosX].ContainsKey(PosY) == false)
         {
             Debug.LogError("tile not find" + PosX + " " + PosY);
             return null;
         }
-        return ButtonMap[PosX][PosY];
+        return TileMap[PosX][PosY];
     }
 
     public void TileOnClick(int PosX, int PosY)

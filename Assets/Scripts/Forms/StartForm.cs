@@ -14,6 +14,8 @@ public class StartForm : MonoSingleton<StartForm>
 
     public GameObject BattleField;
     public GameObject CardSession;
+
+    public GameObject BattleLog;
     
     // Start is called before the first frame update
     void Start()
@@ -37,8 +39,6 @@ public class StartForm : MonoSingleton<StartForm>
 
     public void OnChoiceSelected(int ChoiceIndex)
     {
-        Debug.Log(ConfigMgr.Instance.MinionConfig.MinionConfigMap[1].Name);
-
         BattleFieldBehaviour BattleFieldBehaviour = (BattleFieldBehaviour)BattleField.GetComponent<BattleFieldBehaviour>();
         if (ChoiceIndex == 0)
         {

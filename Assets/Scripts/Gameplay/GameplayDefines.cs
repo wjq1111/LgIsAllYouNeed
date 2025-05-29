@@ -58,3 +58,9 @@ public enum EPlayerIndex
     RealPlayerIndex = 0,
     EnemyPlayerIndex = 1,
 }
+
+public enum EffectType
+{
+    EffectType_Invalid = 0,
+    EffectType_Summon = 1,
+}

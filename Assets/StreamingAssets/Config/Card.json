@@ -1,0 +1,39 @@
+{
+    "Cards": [
+        {
+            "CardId": 1,
+            "CardName": "lg No.1",
+            "CardEffect": [
+                1
+            ]
+        },
+        {
+            "CardId": 2,
+            "CardName": "lg No.2",
+            "CardEffect": [
+                2
+            ]
+        },
+        {
+            "CardId": 3,
+            "CardName": "lg No.3",
+            "CardEffect": [
+                1
+            ]
+        },
+        {
+            "CardId": 4,
+            "CardName": "lg No.4",
+            "CardEffect": [
+                2
+            ]
+        },
+        {
+            "CardId": 5,
+            "CardName": "lg No.5",
+            "CardEffect": [
+                1
+            ]
+        }
+    ]
+}

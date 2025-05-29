@@ -5,7 +5,7 @@ using UnityEngine;
 /*
  随从
  */
-public class Minion 
+public class Minion
 {
     private string name = "default minion";
     private int attack = 0;
@@ -66,8 +66,7 @@ public class Minion
         PlayerId = NewMinion.PlayerId;
     }
 
-    // TODO: Utility.cs
-    public void ReadMinion(int minionId, int playerId)
+    public void InitByMinionConfig(int minionId, int playerId)
     {
         MinionConfigItem MinionConfigItem = ConfigMgr.Instance.MinionConfig.MinionConfigMap[minionId];
 
@@ -80,5 +79,30 @@ public class Minion
         RemainMovement = MinionConfigItem.BaseMovement;
         MaxMovement = MinionConfigItem.BaseMovement;
         PlayerId = playerId;
+    }
+
+    public void InitBySummonEffect(SummonEffect SummonEffect, int MyPlayerId)
+    {
+        Attack = SummonEffect.Attack;
+        Defense = SummonEffect.Defense;
+        Hitpoint = SummonEffect.Hitpoint;
+        Name = SummonEffect.Name;
+        RemainAction = SummonEffect.BaseAction;
+        MaxAction = SummonEffect.BaseAction;
+        RemainMovement = SummonEffect.BaseMovement;
+        MaxMovement = SummonEffect.BaseMovement;
+        PlayerId = MyPlayerId;
+    }
+
+    public void RoundStartReset()
+    {
+        if (RemainAction != MaxAction || RemainMovement != MaxMovement)
+        {
+            // 回合开始时重置
+            RemainAction = MaxAction;
+            RemainMovement = MaxMovement;
+            GameFramework.Instance.BattleLog(Name + " already reset!");
+        }
+
     }
 }

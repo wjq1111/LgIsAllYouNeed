@@ -27,10 +27,28 @@ public class Card
     public List<BaseEffect> CardEffect { get => cardEffect; set => cardEffect = value; }
     public int PlayerId { get => playerId; set => playerId = value; }
 
-    public void Init(string Name, List<BaseEffect> cardEffect)
+    public void Init(CardConfigItem CardConfigItem)
     {
-        //this.cid = cid;
-        this.Name = Name;
-        this.CardEffect = cardEffect;
+        CardId = CardConfigItem.CardId;
+        Name = CardConfigItem.CardName;
+
+        foreach (int EffectId in CardConfigItem.CardEffect)
+        {
+            EffectConfigItem EffectConfigItem = ConfigMgr.Instance.EffectConfig.EffectMap[EffectId];
+            if (EffectConfigItem.EffectType == (int)EffectType.EffectType_Summon)
+            {
+                SummonEffect SummonEffect = new SummonEffect();
+                SummonEffect.EffectType = EffectType.EffectType_Summon;
+
+                MinionConfigItem MinionConfigItem = ConfigMgr.Instance.MinionConfig.MinionConfigMap[EffectConfigItem.MinionId];
+                SummonEffect.Init(MinionConfigItem);
+
+                CardEffect.Add(SummonEffect);
+            }
+            else
+            {
+                // TODO 更多卡效果
+            }
+        }
     }
 }

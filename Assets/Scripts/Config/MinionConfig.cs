@@ -27,7 +27,7 @@ public class MinionConfigItem
 [System.Serializable]
 public class MinionConfig
 {
-    public List<MinionConfigItem> minions;
+    public List<MinionConfigItem> Minions;
     private bool _mapsInitialize = false;
 
     private Dictionary<int, MinionConfigItem> minionConfigMap = new Dictionary<int, MinionConfigItem>();
@@ -41,7 +41,7 @@ public class MinionConfig
             return;
         }
 
-        foreach (MinionConfigItem item in minions)
+        foreach (MinionConfigItem item in Minions)
         {
             MinionConfigMap.Add(item.MinionId, item);
         }

@@ -16,23 +16,13 @@ public class Handbook : Singleton<Handbook>
 
     public new void Init()
     {
-        // TODO 配置 第一次开游戏，肯定需要一些基础牌
-        UnlockedCards.Add(InitTempCard(1));
-        UnlockedCards.Add(InitTempCard(2));
-        UnlockedCards.Add(InitTempCard(3));
-        UnlockedCards.Add(InitTempCard(4));
-        UnlockedCards.Add(InitTempCard(5));
-
-    }
-
-    private Card InitTempCard(int Index)
-    {
-        Card StartCard = new Card();
-        StartCard.CardId = Index;
-        StartCard.Name = "a" + Index + "-d1-f1";
-        StartCard.CardEffect = new List<BaseEffect>();
-        SummonEffect StartCardSummonEffect = new SummonEffect();
-        StartCard.CardEffect.Add(StartCardSummonEffect);
-        return StartCard;
+        // TODO 不应该每次都读配置，而是只有第一次读配置，后面读存档
+        foreach (var item in ConfigMgr.Instance.BaseHandbookConfig.CardMap)
+        {
+            Card NewCard = new Card();
+            CardConfigItem CardConfigItem = ConfigMgr.Instance.CardConfig.CardMap[item.Value.CardId];
+            NewCard.Init(CardConfigItem);
+            UnlockedCards.Add(NewCard);
+        }
     }
 }

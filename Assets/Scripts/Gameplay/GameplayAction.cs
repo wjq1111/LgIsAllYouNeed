@@ -70,6 +70,8 @@ public class WaitStartAction : GameplayAction
         base.OnEvent(Context, GpEvent);
         if (GpEvent.Type == GameplayEventType.GameplayEventType_StartGame)
         {
+            GameFramework.Instance.BattleLog("Game Start!");
+
             GameObject BattleFieldObj = GameFramework.Instance.GetBattleFieldObj();
             BattleFieldBehaviour BattleFieldBehaviour = BattleFieldObj.GetComponent<BattleFieldBehaviour>();
             BattleFieldBehaviour.GenerateBattleFieldTiles();
@@ -110,6 +112,20 @@ public class RoundStartAction : GameplayAction
         List<Card> CardList = CardDeck.Instance.DrawCards(CurRoundDrawCardNum);
 
         Context.Players[Context.GpFsm.CurPlayerIndex].AddCard(CardList);
+
+        // 己方Minion回复行动力
+        Dictionary<int, Dictionary<int, GameObject>> TileMap = GameFramework.Instance.GetBattleFieldObj().GetComponent<BattleFieldBehaviour>().TileMap;
+        foreach (var Dict in TileMap)
+        {
+            foreach (var Tile in Dict.Value)
+            {
+                Minion Minion = Tile.Value.GetComponent<BattleFieldTileBehaviour>().Minion;
+                if (Minion != null && Minion.PlayerId == Context.GpFsm.CurPlayerIndex)
+                {
+                    Minion.RoundStartReset();
+                }
+            }
+        }
 
         GameplayEvent GpEvent = new GameplayEvent();
         GpEvent.Type = GameplayEventType.GameplayEventType_DrawCard;
@@ -178,112 +194,118 @@ public class RoundingAction : GameplayAction
             bool NeedFinishGame = GameFramework.Instance.GetBattleFieldObj().GetComponent<BattleFieldBehaviour>().NeedFinishGame();
             if (NeedFinishGame)
             {
+                GameFramework.Instance.BattleLog("Game End!");
                 return GameplayEventResult.GameplayEventResult_NeedSwitch;
             }
             return GameplayEventResult.GameplayEventResult_NoNeedSwitch;
         }
 
-        if (GpEvent.Type == GameplayEventType.GameplayEventType_ClickCard)
+        // 只有玩家回合点击才有效果
+        if (Context.GpFsm.CurPlayerIndex == (int)EPlayerIndex.RealPlayerIndex)
         {
-            GameplayStatus GpCurStatus = GetCurStatus(Context);
-            Player CurPlayer = Context.Players[Context.GpFsm.CurPlayerIndex];
-
-            if (CurPlayer.CardList[GpEvent.ClickCardEvent.PosX].CardId != 0)
+            if (GpEvent.Type == GameplayEventType.GameplayEventType_ClickCard)
             {
-                CurPlayer.ChooseCardPosX = GpEvent.ClickCardEvent.PosX;
-                CurPlayer.ChooseCardPosY = GpEvent.ClickCardEvent.PosY;
-            }
-        }
+                GameplayStatus GpCurStatus = GetCurStatus(Context);
+                Player CurPlayer = Context.Players[Context.GpFsm.CurPlayerIndex];
 
-        if (GpEvent.Type == GameplayEventType.GameplayEventType_ClickTile)
-        {
-            GameplayStatus GpCurStatus = GetCurStatus(Context);
-            Player CurPlayer = Context.Players[Context.GpFsm.CurPlayerIndex];
-
-            if (CurPlayer.ChooseCardPosX == -1 && CurPlayer.ChooseCardPosY == -1)
-            {
-                // 玩家已选择的卡的位置是非法值，说明没有点手牌，直接点了tile
-                // 判断tile上有没有棋子，如果有的话，在下一次点tile的时候，移动棋子
-                if (CurPlayer.ChooseBattleFileTilePosX == -1 && CurPlayer.ChooseBattleFileTilePosY == -1)
+                if (CurPlayer.CardList[GpEvent.ClickCardEvent.PosX].CardId != 0)
                 {
-                    CurPlayer.ChooseBattleFileTilePosX = GpEvent.ClickTileEvent.PosX;
-                    CurPlayer.ChooseBattleFileTilePosY = GpEvent.ClickTileEvent.PosY;
+                    CurPlayer.ChooseCardPosX = GpEvent.ClickCardEvent.PosX;
+                    CurPlayer.ChooseCardPosY = GpEvent.ClickCardEvent.PosY;
                 }
-                else
+            }
+
+            if (GpEvent.Type == GameplayEventType.GameplayEventType_ClickTile)
+            {
+                GameplayStatus GpCurStatus = GetCurStatus(Context);
+                Player CurPlayer = Context.Players[Context.GpFsm.CurPlayerIndex];
+
+                if (CurPlayer.ChooseCardPosX == -1 && CurPlayer.ChooseCardPosY == -1)
                 {
-                    GameObject BattleFieldObj = GameFramework.Instance.GetBattleFieldObj();
-                    BattleFieldBehaviour BattleFieldBehaviour = BattleFieldObj.GetComponent<BattleFieldBehaviour>();
-                    // 如果上一次选择的格子是空的，则重置选择的格子，如果相同，视为没操作
-                    GameObject OldChooseTile = BattleFieldBehaviour.GetTile(CurPlayer.ChooseBattleFileTilePosX, CurPlayer.ChooseBattleFileTilePosY);
-                    Minion OldMinion = OldChooseTile.GetComponent<BattleFieldTileBehaviour>().Minion;
-                    if (OldMinion == null)
+                    // 玩家已选择的卡的位置是非法值，说明没有点手牌，直接点了tile
+                    // 判断tile上有没有棋子，如果有的话，在下一次点tile的时候，移动棋子
+                    if (CurPlayer.ChooseBattleFileTilePosX == -1 && CurPlayer.ChooseBattleFileTilePosY == -1)
                     {
-                        // 空选，当做没选
                         CurPlayer.ChooseBattleFileTilePosX = GpEvent.ClickTileEvent.PosX;
                         CurPlayer.ChooseBattleFileTilePosY = GpEvent.ClickTileEvent.PosY;
-                    }
-                    else if (BattleFieldBehaviour.CanReach(CurPlayer.ChooseBattleFileTilePosX, CurPlayer.ChooseBattleFileTilePosY, GpEvent.ClickTileEvent.PosX, GpEvent.ClickTileEvent.PosY))
-                    {
-                        // 两位置之间的距离合法，且新位置没有怪物
-                        Minion NewMinion = BattleFieldBehaviour.GetTile(GpEvent.ClickTileEvent.PosX, GpEvent.ClickTileEvent.PosY).GetComponent<BattleFieldTileBehaviour>().Minion;
-                        if (NewMinion == null)
-                        {
-                            if (OldMinion.RemainMovement > 0)
-                            {
-                                // 先去掉原位置的棋子，再加上新位置的棋子
-                                BattleFieldBehaviour.MoveTile(CurPlayer.ChooseBattleFileTilePosX, CurPlayer.ChooseBattleFileTilePosY, GpEvent.ClickTileEvent.PosX, GpEvent.ClickTileEvent.PosY);
-                                CurPlayer.ResetChooseBattleFieldTile();
-                            }
-                            else
-                            {
-                                // 行动力不足，暂时打个日志，理想状态应该是提示一下
-                                Debug.Log(OldMinion.Name + " cannot move ");
-                            }
-                        }
-                        // 新位置是己方，不可移动
-                        else if (NewMinion.PlayerId == OldMinion.PlayerId)
-                        {
-                            Debug.Log(OldMinion.Name + " is blocked by " + NewMinion.Name);
-                        }
-                        // 新位置是敌方，战斗
-                        else
-                        {
-                            if (OldMinion.RemainAction > 0)
-                            {
-                                BattleFieldBehaviour.Combat(CurPlayer.ChooseBattleFileTilePosX, CurPlayer.ChooseBattleFileTilePosY, GpEvent.ClickTileEvent.PosX, GpEvent.ClickTileEvent.PosY);
-                                CurPlayer.ResetChooseBattleFieldTile();
-                                Debug.Log(OldMinion.Name + " fight with " + NewMinion.Name);
-                            }
-                        }
                     }
                     else
                     {
-                        // 两者之间的距离不合法，无法移动
-                        CurPlayer.ChooseBattleFileTilePosX = GpEvent.ClickTileEvent.PosX;
-                        CurPlayer.ChooseBattleFileTilePosY = GpEvent.ClickTileEvent.PosY;
+                        GameObject BattleFieldObj = GameFramework.Instance.GetBattleFieldObj();
+                        BattleFieldBehaviour BattleFieldBehaviour = BattleFieldObj.GetComponent<BattleFieldBehaviour>();
+                        // 如果上一次选择的格子是空的，则重置选择的格子，如果相同，视为没操作
+                        GameObject OldChooseTile = BattleFieldBehaviour.GetTile(CurPlayer.ChooseBattleFileTilePosX, CurPlayer.ChooseBattleFileTilePosY);
+                        Minion OldMinion = OldChooseTile.GetComponent<BattleFieldTileBehaviour>().Minion;
+                        if (OldMinion == null)
+                        {
+                            // 空选，当做没选
+                            CurPlayer.ChooseBattleFileTilePosX = GpEvent.ClickTileEvent.PosX;
+                            CurPlayer.ChooseBattleFileTilePosY = GpEvent.ClickTileEvent.PosY;
+                        }
+                        else if (BattleFieldBehaviour.CanReach(CurPlayer.ChooseBattleFileTilePosX, CurPlayer.ChooseBattleFileTilePosY, GpEvent.ClickTileEvent.PosX, GpEvent.ClickTileEvent.PosY))
+                        {
+                            // 两位置之间的距离合法，且新位置没有怪物
+                            Minion NewMinion = BattleFieldBehaviour.GetTile(GpEvent.ClickTileEvent.PosX, GpEvent.ClickTileEvent.PosY).GetComponent<BattleFieldTileBehaviour>().Minion;
+                            if (NewMinion == null)
+                            {
+                                if (OldMinion.RemainMovement > 0)
+                                {
+                                    // 先去掉原位置的棋子，再加上新位置的棋子
+                                    BattleFieldBehaviour.MoveTile(CurPlayer.ChooseBattleFileTilePosX, CurPlayer.ChooseBattleFileTilePosY, GpEvent.ClickTileEvent.PosX, GpEvent.ClickTileEvent.PosY);
+                                }
+                                else
+                                {
+                                    // 行动力不足，暂时打个日志，理想状态应该是提示一下
+                                    Debug.Log(OldMinion.Name + " cannot move ");
+                                }
+                                CurPlayer.ResetChooseBattleFieldTile();
+                            }
+                            // 新位置是己方，不可移动
+                            else if (NewMinion.PlayerId == OldMinion.PlayerId)
+                            {
+                                Debug.Log(OldMinion.Name + " is blocked by " + NewMinion.Name);
+                                CurPlayer.ResetChooseBattleFieldTile();
+                            }
+                            // 新位置是敌方，战斗
+                            else
+                            {
+                                if (OldMinion.RemainAction > 0)
+                                {
+                                    BattleFieldBehaviour.Combat(CurPlayer.ChooseBattleFileTilePosX, CurPlayer.ChooseBattleFileTilePosY, GpEvent.ClickTileEvent.PosX, GpEvent.ClickTileEvent.PosY);
+                                    Debug.Log(OldMinion.Name + " fight with " + NewMinion.Name);
+                                }
+                                CurPlayer.ResetChooseBattleFieldTile();
+                            }
+                        }
+                        else
+                        {
+                            // 两者之间的距离不合法，无法移动
+                            CurPlayer.ChooseBattleFileTilePosX = GpEvent.ClickTileEvent.PosX;
+                            CurPlayer.ChooseBattleFileTilePosY = GpEvent.ClickTileEvent.PosY;
+                        }
                     }
+
+                    return GameplayEventResult.GameplayEventResult_NoNeedSwitch;
                 }
+                else
+                {
+                    // 玩家已选择的卡的位置不是非法值，认为玩家已经选了卡，现在要放到某个格子上
+                    int TilePosX = GpEvent.ClickTileEvent.PosX;
+                    int TilePosY = GpEvent.ClickTileEvent.PosY;
 
-                return GameplayEventResult.GameplayEventResult_NoNeedSwitch;
-            }
-            else
-            {
-                // 玩家已选择的卡的位置不是非法值，认为玩家已经选了卡，现在要放到某个格子上
-                int TilePosX = GpEvent.ClickTileEvent.PosX;
-                int TilePosY = GpEvent.ClickTileEvent.PosY;
+                    // 把玩家选的那个卡 变成棋子 放到玩家选的那个格子上
+                    GameObject BattleFieldObj = GameFramework.Instance.GetBattleFieldObj();
+                    BattleFieldBehaviour BattleFieldBehaviour = BattleFieldObj.GetComponent<BattleFieldBehaviour>();
+                    BattleFieldBehaviour.AddTile(CurPlayer.ChooseCardPosX, CurPlayer.ChooseCardPosY, TilePosX, TilePosY);
 
-                // 把玩家选的那个卡 变成棋子 放到玩家选的那个格子上
-                GameObject BattleFieldObj = GameFramework.Instance.GetBattleFieldObj();
-                BattleFieldBehaviour BattleFieldBehaviour = BattleFieldObj.GetComponent<BattleFieldBehaviour>();
-                BattleFieldBehaviour.AddTile(CurPlayer.ChooseCardPosX, CurPlayer.ChooseCardPosY, TilePosX, TilePosY);
+                    // 删除玩家手牌，马上重新渲染card session
+                    CurPlayer.DelCard(CurPlayer.ChooseCardPosX, CurPlayer.ChooseCardPosY);
+                    GameObject CardSessionObj = GameFramework.Instance.GetCardSessionObj();
+                    CardSessionBehaviour CardSessionBehaviour = CardSessionObj.GetComponent<CardSessionBehaviour>();
+                    CardSessionBehaviour.ShowCards(CurPlayer.CardList);
 
-                // 删除玩家手牌，马上重新渲染card session
-                CurPlayer.DelCard(CurPlayer.ChooseCardPosX, CurPlayer.ChooseCardPosY);
-                GameObject CardSessionObj = GameFramework.Instance.GetCardSessionObj();
-                CardSessionBehaviour CardSessionBehaviour = CardSessionObj.GetComponent<CardSessionBehaviour>();
-                CardSessionBehaviour.ShowCards(CurPlayer.CardList);
-
-                CurPlayer.ResetChooseCard();
+                    CurPlayer.ResetChooseCard();
+                }
             }
         }
         return GameplayEventResult.GameplayEventResult_NoNeedSwitch;

@@ -1,5 +1,5 @@
 {
-    "minions": [
+    "Minions": [
         {
             "MinionId": 1,
             "Name": "lg's efls",
@@ -14,6 +14,24 @@
             "Name": "lg's joker",
             "Attack": 1,
             "Defense": 1,
+            "HitPoint": 10,
+            "BaseAction": 1,
+            "BaseMovement": 2
+        },
+        {
+            "MinionId": 3,
+            "Name": "minion lg",
+            "Attack": 5,
+            "Defense": 5,
+            "HitPoint": 10,
+            "BaseAction": 1,
+            "BaseMovement": 2
+        },
+        {
+            "MinionId": 4,
+            "Name": "minion lg2",
+            "Attack": 5,
+            "Defense": 5,
             "HitPoint": 10,
             "BaseAction": 1,
             "BaseMovement": 2

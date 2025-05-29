@@ -8,7 +8,9 @@ using System.ComponentModel;
 [System.Serializable]
 public class EnemyMinion
 {
+    // 召唤物id
     public int MinionId;
+    // 召唤物的位置
     public int TilePosX;
     public int TilePosY;
 }
@@ -20,7 +22,7 @@ public class StageConfigItem
     public int StageId;
     // 这一关的boss怪
     public int BossMinionId;
-    // boss的怪在哪里
+    // boss的怪位置
     public int TilePosX;
     public int TilePosY;
     public List<EnemyMinion> EnemyMinions;
@@ -29,7 +31,7 @@ public class StageConfigItem
 [System.Serializable]
 public class StageConfig
 {
-    public List<StageConfigItem> stages;
+    public List<StageConfigItem> Stages;
     private bool _mapsInitialize = false;
 
     private Dictionary<int, StageConfigItem> stageConfigMap = new Dictionary<int, StageConfigItem>();
@@ -43,11 +45,10 @@ public class StageConfig
             return;
         }
 
-        foreach (StageConfigItem item in stages)
+        foreach (StageConfigItem item in Stages)
         {
             StageConfigMap.Add(item.StageId, item);
         }
         _mapsInitialize = true;
     }
-
 }
