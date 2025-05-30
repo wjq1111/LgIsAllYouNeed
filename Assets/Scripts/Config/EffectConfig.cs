@@ -2,6 +2,16 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+[System.Serializable]
+public class EffectAttrConfig
+{
+    public int EffectAttrRoundType; // 每回合 还是 一回合
+    public int Attack;
+    public int Defense;
+    public int Hitpoint;
+    public int Movement;
+    public int Action;
+}
 
 [System.Serializable]
 public class EffectConfigItem
@@ -12,6 +22,8 @@ public class EffectConfigItem
     public int EffectType;
     // EffectType = 1 召唤效果 对应的召唤物id
     public int MinionId;
+    // EffectType = 2 修改属性相关
+    public EffectAttrConfig EffectAttrConfig;
 }
 
 [System.Serializable]

@@ -45,10 +45,15 @@ public class Card
 
                 CardEffect.Add(SummonEffect);
             }
-            else
+            else if (EffectConfigItem.EffectType == (uint)EffectType.EffectType_Attr)
             {
-                // TODO 更多卡效果
+                AttrEffect AttrEffect = new AttrEffect();
+                AttrEffect.EffectType = EffectType.EffectType_Attr;
+
+                AttrEffect.Init(EffectConfigItem.EffectAttrConfig);
+                CardEffect.Add(AttrEffect);
             }
+            // TODO
         }
     }
 }

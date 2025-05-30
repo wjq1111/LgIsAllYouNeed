@@ -9,6 +9,24 @@
             "EffectId": 2,
             "EffectType": 1,
             "MinionId": 4
+        },
+        {
+            "EffectId": 3,
+            "EffectType": 2,
+            "EffectAttrConfig": {
+                "Attack": 1,
+                "HitPoint": -1,
+                "EffectAttrRoundType": 1
+            }
+        },
+        {
+            "EffectId": 4,
+            "EffectType": 2,
+            "EffectAttrConfig": {
+                "Attack": 1,
+                "HitPoint": -1,
+                "EffectAttrRoundType": 2
+            }
         }
     ]
 }

@@ -19,6 +19,9 @@ public class Minion
 
     private int playerId = 0;
 
+    private bool oneRoundEffect = false;
+    private AttrEffect attrEffect = new AttrEffect();
+
     public string Name { get => name; set => name = value; }
     public int Attack { get => attack; set => attack = value; }
     public int Defense { get => defense; set => defense = value; }
@@ -32,6 +35,11 @@ public class Minion
             GameObject BattleField = GameFramework.DfsObj(GameFramework.Instance.StartPrefab.transform, "BattleField").gameObject;
             BattleFieldBehaviour BattleFieldBehaviour = BattleField.GetComponent<BattleFieldBehaviour>();
             BattleFieldBehaviour.GameplayFsm.ProcessEvent(BattleFieldBehaviour.GameplayContext, GameplayEventType.GameplayEventType_CheckFinishGame);
+
+            if (hitpoint <= 0)
+            {
+                GameFramework.Instance.BattleLog("dead effect");
+            }
         }
     }
     public int RemainAction { get => remainAction; set => remainAction = value; }
@@ -39,6 +47,8 @@ public class Minion
     public int RemainMovement { get => remainMovement; set => remainMovement = value; }
     public int MaxMovement { get => maxMovement; set => maxMovement = value; }
     public int PlayerId { get => playerId; set => playerId = value; }
+    public bool OneRoundEffect { get => oneRoundEffect; set => oneRoundEffect = value; }
+    public AttrEffect AttrEffect { get => attrEffect; set => attrEffect = value; }
 
     public void Reset()
     {
@@ -94,8 +104,56 @@ public class Minion
         PlayerId = MyPlayerId;
     }
 
+    public void AddEffect()
+    {
+        if (AttrEffect.EffectAttrRoundType == EffectAttrRoundType.EffectAttrType_OneRound)
+        {
+            // 只加一回合，需要标记
+            if (OneRoundEffect == false)
+            {
+                OneRoundEffect = true;
+                RealAddEffect();
+            }
+        }
+        else if (AttrEffect.EffectAttrRoundType == EffectAttrRoundType.EffectAttrType_EveryRound)
+        {
+            RealAddEffect();
+        }
+    }
+
+    public void RealAddEffect()
+    {
+        if (AttrEffect.Attack != 0)
+        {
+            Attack += AttrEffect.Attack;
+            GameFramework.Instance.BattleLog(Name + " attack add " + AttrEffect.Attack);
+        }
+        if (AttrEffect.Defense != 0)
+        {
+            Defense += AttrEffect.Defense;
+            GameFramework.Instance.BattleLog(Name + " defense add " + AttrEffect.Defense);
+        }
+        if (AttrEffect.Hitpoint != 0)
+        {
+            Hitpoint += AttrEffect.Hitpoint;
+            GameFramework.Instance.BattleLog(Name + " hitpoint add " + AttrEffect.Hitpoint);
+        }
+        if (AttrEffect.Action != 0)
+        {
+            MaxAction += AttrEffect.Action;
+            GameFramework.Instance.BattleLog(Name + " max action add " + AttrEffect.Action);
+        }
+        if (AttrEffect.Movement != 0)
+        {
+            MaxMovement += AttrEffect.Movement;
+            GameFramework.Instance.BattleLog(Name + " max movement add " + AttrEffect.Movement);
+        }
+    }
     public void RoundStartReset()
     {
+        // 给Minion添加属性
+        AddEffect();
+
         if (RemainAction != MaxAction || RemainMovement != MaxMovement)
         {
             // 回合开始时重置
@@ -103,6 +161,5 @@ public class Minion
             RemainMovement = MaxMovement;
             GameFramework.Instance.BattleLog(Name + " already reset!");
         }
-
     }
 }

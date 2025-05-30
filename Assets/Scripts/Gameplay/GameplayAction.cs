@@ -75,7 +75,7 @@ public class WaitStartAction : GameplayAction
             GameObject BattleFieldObj = GameFramework.Instance.GetBattleFieldObj();
             BattleFieldBehaviour BattleFieldBehaviour = BattleFieldObj.GetComponent<BattleFieldBehaviour>();
             BattleFieldBehaviour.GenerateBattleFieldTiles();
-            BattleFieldBehaviour.AddEnemy();
+            BattleFieldBehaviour.InitPlayerObject();
 
             GameObject CardSessionObj = GameFramework.Instance.GetCardSessionObj();
             CardSessionBehaviour CardSessionBehaviour = CardSessionObj.GetComponent<CardSessionBehaviour>();
@@ -113,8 +113,11 @@ public class RoundStartAction : GameplayAction
 
         Context.Players[Context.GpFsm.CurPlayerIndex].AddCard(CardList);
 
-        // 己方Minion回复行动力
+        GameObject BattleField = GameFramework.Instance.GetBattleFieldObj();
+        BattleFieldBehaviour BattleFieldBehaviour = BattleField.GetComponent<BattleFieldBehaviour>();
+        // 己方Minion回合reset操作
         Dictionary<int, Dictionary<int, GameObject>> TileMap = GameFramework.Instance.GetBattleFieldObj().GetComponent<BattleFieldBehaviour>().TileMap;
+        Dictionary<int, Dictionary<int, bool>> NeedRemoveMinion = new Dictionary<int, Dictionary<int, bool>>();
         foreach (var Dict in TileMap)
         {
             foreach (var Tile in Dict.Value)
@@ -123,7 +126,31 @@ public class RoundStartAction : GameplayAction
                 if (Minion != null && Minion.PlayerId == Context.GpFsm.CurPlayerIndex)
                 {
                     Minion.RoundStartReset();
+                    // 检查召唤物是不是死了
+                    if (Minion.Hitpoint <= 0)
+                    {
+                        if (NeedRemoveMinion.ContainsKey(Dict.Key) == false)
+                        {
+                            Dictionary<int, bool> keyValuePairs = new Dictionary<int, bool>();
+                            keyValuePairs[Tile.Key] = true;
+                            NeedRemoveMinion[Dict.Key] = keyValuePairs;
+                        }
+                        else
+                        {
+                            NeedRemoveMinion[Dict.Key].Add(Tile.Key, true);
+                        }
+                    }
                 }
+            }
+        }
+        // 清理掉死的召唤物
+        foreach (var PosX in NeedRemoveMinion.Keys)
+        {
+            foreach (var PosY in NeedRemoveMinion[PosX].Keys)
+            {
+                GameObject Tile = BattleFieldBehaviour.GetTile(PosX, PosY);
+                GameFramework.Instance.BattleLog(Tile.GetComponent<BattleFieldTileBehaviour>().Minion.Name + " dead!");
+                BattleFieldBehaviour.RemoveTileMinion(PosX, PosY);
             }
         }
 
@@ -186,13 +213,14 @@ public class RoundingAction : GameplayAction
 
         if (GpEvent.Type == GameplayEventType.GameplayEventType_EndRound)
         {
+            GameFramework.Instance.BattleLog("cur player " + Context.GpFsm.CurPlayerIndex + " round end!");
             return GameplayEventResult.GameplayEventResult_NeedSwitch;
         }
 
         if (GpEvent.Type == GameplayEventType.GameplayEventType_CheckFinishGame)
         {
-            bool NeedFinishGame = GameFramework.Instance.GetBattleFieldObj().GetComponent<BattleFieldBehaviour>().NeedFinishGame();
-            if (NeedFinishGame)
+            GameplayFinishReason Reason = GameFramework.Instance.GetBattleFieldObj().GetComponent<BattleFieldBehaviour>().NeedFinishGame();
+            if (Reason != GameplayFinishReason.GameplayFinishReason_Invalid)
             {
                 GameFramework.Instance.BattleLog("Game End!");
                 return GameplayEventResult.GameplayEventResult_NeedSwitch;
@@ -293,10 +321,10 @@ public class RoundingAction : GameplayAction
                     int TilePosX = GpEvent.ClickTileEvent.PosX;
                     int TilePosY = GpEvent.ClickTileEvent.PosY;
 
-                    // 把玩家选的那个卡 变成棋子 放到玩家选的那个格子上
+                    // 把玩家选的那个卡 施加到格子上的效果
                     GameObject BattleFieldObj = GameFramework.Instance.GetBattleFieldObj();
                     BattleFieldBehaviour BattleFieldBehaviour = BattleFieldObj.GetComponent<BattleFieldBehaviour>();
-                    BattleFieldBehaviour.AddTile(CurPlayer.ChooseCardPosX, CurPlayer.ChooseCardPosY, TilePosX, TilePosY);
+                    BattleFieldBehaviour.UseCard(CurPlayer.ChooseCardPosX, CurPlayer.ChooseCardPosY, TilePosX, TilePosY);
 
                     // 删除玩家手牌，马上重新渲染card session
                     CurPlayer.DelCard(CurPlayer.ChooseCardPosX, CurPlayer.ChooseCardPosY);

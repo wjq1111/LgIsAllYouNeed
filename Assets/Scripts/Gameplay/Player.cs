@@ -16,12 +16,16 @@ public class Player
     private int chooseBattleFileTilePosX = -1;
     private int chooseBattleFileTilePosY = -1;
 
+    // 玩家主体，他如果被销毁了，说明这个player完蛋了
+    private GameObject playerObject = new GameObject();
+
     public List<Card> CardList { get => cardList; set => cardList = value; }
     public int ChooseCardPosX { get => chooseCardPosX; set => chooseCardPosX = value; }
     public int ChooseCardPosY { get => chooseCardPosY; set => chooseCardPosY = value; }
     public int ChooseBattleFileTilePosX { get => chooseBattleFileTilePosX; set => chooseBattleFileTilePosX = value; }
     public int ChooseBattleFileTilePosY { get => chooseBattleFileTilePosY; set => chooseBattleFileTilePosY = value; }
     public int PlayerId { get => playerId; set => playerId = value; }
+    public GameObject PlayerObject { get => playerObject; set => playerObject = value; }
 
     public void InitPlayer(int playerId)
     {

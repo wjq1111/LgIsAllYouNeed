@@ -73,6 +73,7 @@
     <Compile Include="Assets\Scripts\Forms\StartForm.cs" />
     <Compile Include="Assets\Scripts\Config\CardConfig.cs" />
     <Compile Include="Assets\Scripts\Gameplay\Player.cs" />
+    <Compile Include="Assets\Scripts\Gameplay\Effect\AttrEffect.cs" />
     <Compile Include="Assets\Scripts\Gameplay\Effect\BaseEffect.cs" />
     <Compile Include="Assets\Scripts\Gameplay\GameplayStatus.cs" />
     <Compile Include="Assets\Scripts\Config\MinionConfig.cs" />

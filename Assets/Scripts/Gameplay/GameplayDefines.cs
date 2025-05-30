@@ -31,6 +31,13 @@ public enum GameplayEventResult
     GameplayEventResult_NeedSwitch,
 }
 
+public enum GameplayFinishReason
+{
+    GameplayFinishReason_Invalid = 0,
+    GameplayFinishReason_RealPlayerWin,
+    GameplayFinishReason_EnemyPlayerWin,
+}
+
 public class GameplayEventClickCard
 {
     public int PosX = 0;
@@ -62,5 +69,15 @@ public enum EPlayerIndex
 public enum EffectType
 {
     EffectType_Invalid = 0,
+    // 召唤
     EffectType_Summon = 1,
+    // 修改属性相关
+    EffectType_Attr = 2,
+}
+
+public enum EffectAttrRoundType
+{
+    EffectAttrType_Invalid = 0,
+    EffectAttrType_OneRound = 1,
+    EffectAttrType_EveryRound = 2,
 }

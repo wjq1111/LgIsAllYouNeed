@@ -19,21 +19,4 @@ public class BattleFieldTileBehaviour : MonoBehaviour
     public float CoordX { get => coordX; set => coordX = value; }
     public float CoordY { get => coordY; set => coordY = value; }
     public Minion Minion { get => minion; set => minion = value; }
-
-    public string Log()
-    {
-        return "tile: " + Name + " pos x: " + PosX + " pos y: " + PosY + " coord x: " + coordX + " coord y: " + coordY;
-    }
-
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
 }

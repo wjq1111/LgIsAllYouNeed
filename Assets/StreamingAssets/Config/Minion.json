@@ -23,7 +23,7 @@
             "Name": "minion lg",
             "Attack": 5,
             "Defense": 5,
-            "HitPoint": 10,
+            "HitPoint": 3,
             "BaseAction": 1,
             "BaseMovement": 2
         },
@@ -32,7 +32,7 @@
             "Name": "minion lg2",
             "Attack": 5,
             "Defense": 5,
-            "HitPoint": 10,
+            "HitPoint": 3,
             "BaseAction": 1,
             "BaseMovement": 2
         }

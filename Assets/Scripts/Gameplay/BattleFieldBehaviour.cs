@@ -13,12 +13,9 @@ public class BattleFieldBehaviour : MonoSingleton<BattleFieldBehaviour>
     private GameplayContext gameplayContext = new GameplayContext();
     private Dictionary<int, Dictionary<int, GameObject>> tileMap = new Dictionary<int, Dictionary<int, GameObject>>();
 
-    private GameObject dummy;
     public GameplayFsm GameplayFsm { get => gameplayFsm; set => gameplayFsm = value; }
     public GameplayContext GameplayContext { get => gameplayContext; set => gameplayContext = value; }
     public Dictionary<int, Dictionary<int, GameObject>> TileMap { get => tileMap; set => tileMap = value; }
-    public GameObject Dummy { get => dummy; set => dummy = value; }
-
 
     private const float edgeLength = 60.0f;
     private const int battleFieldMaxWidth = 8;
@@ -149,7 +146,7 @@ public class BattleFieldBehaviour : MonoSingleton<BattleFieldBehaviour>
         return pos;
     }
 
-    private void RemoveTileMinion(int PosX, int PosY)
+    public void RemoveTileMinion(int PosX, int PosY)
     {
         GameObject Tile = GetTile(PosX, PosY);
         Tile.GetComponent<BattleFieldTileBehaviour>().Minion = null;
@@ -222,51 +219,70 @@ public class BattleFieldBehaviour : MonoSingleton<BattleFieldBehaviour>
         } while (false);
     }
 
-    public bool NeedFinishGame()
+    public GameplayFinishReason NeedFinishGame()
     {
-        if (Dummy == null)
-        {
-            return true;
-        }
-        if (Dummy.GetComponent<BattleFieldTileBehaviour>() == null)
-        {
-            return true;
-        }
-        if (Dummy.GetComponent<BattleFieldTileBehaviour>().Minion == null)
-        {
-            return true;
-        }
-        if (Dummy.GetComponent<BattleFieldTileBehaviour>().Minion.Hitpoint <= 0)
-        {
-            return true;
-        }
-        // 自己死了
+        GameObject RealPlayerObject = GameplayContext.Players[(int)EPlayerIndex.RealPlayerIndex].PlayerObject;
+        GameObject EnemyPlayerObject = GameplayContext.Players[(int)EPlayerIndex.EnemyPlayerIndex].PlayerObject;
 
-        return false;
+        if (RealPlayerObject == null || RealPlayerObject.GetComponent<BattleFieldTileBehaviour>() == null
+            || RealPlayerObject.GetComponent<BattleFieldTileBehaviour>().Minion == null || RealPlayerObject.GetComponent<BattleFieldTileBehaviour>().Minion.Hitpoint <= 0)
+        {
+            return GameplayFinishReason.GameplayFinishReason_EnemyPlayerWin;
+        }
+
+        if (EnemyPlayerObject == null || EnemyPlayerObject.GetComponent<BattleFieldTileBehaviour>() == null
+            || EnemyPlayerObject.GetComponent<BattleFieldTileBehaviour>().Minion == null || EnemyPlayerObject.GetComponent<BattleFieldTileBehaviour>().Minion.Hitpoint <= 0)
+        {
+            return GameplayFinishReason.GameplayFinishReason_RealPlayerWin;
+        }
+
+        return GameplayFinishReason.GameplayFinishReason_Invalid;
     }
 
-    public void AddEnemy()
+    public void InitPlayerObject()
     {
         // TODO 现在只有一关
         int CurStageId = 1;
         StageConfigItem StageConfigItem = ConfigMgr.Instance.StageConfig.StageConfigMap[CurStageId];
         MinionConfigItem MinionConfigItem = ConfigMgr.Instance.MinionConfig.MinionConfigMap[StageConfigItem.BossMinionId];
 
-        Minion CardMinion = new Minion();
-        CardMinion.Attack = MinionConfigItem.Attack;
-        CardMinion.Defense = MinionConfigItem.Defense;
-        CardMinion.Hitpoint = MinionConfigItem.HitPoint;
-        CardMinion.Name = MinionConfigItem.Name;
-        CardMinion.RemainAction = MinionConfigItem.BaseAction;
-        CardMinion.MaxAction = MinionConfigItem.BaseAction;
-        CardMinion.RemainMovement = MinionConfigItem.BaseMovement;
-        CardMinion.MaxMovement = MinionConfigItem.BaseMovement;
-        CardMinion.PlayerId = (int)EPlayerIndex.EnemyPlayerIndex;
-        Dummy = GetTile(StageConfigItem.TilePosX, StageConfigItem.TilePosY);
-        Dummy.GetComponent<BattleFieldTileBehaviour>().Minion = CardMinion;
-        Dummy.GetComponentInChildren<TMP_Text>().SetText(CardMinion.Name);
+        // 初始化玩家的playerobject
+        foreach (Player Player in GameplayContext.Players)
+        {
+            if (Player.PlayerId == (int)EPlayerIndex.RealPlayerIndex)
+            {
+                // 自己人，固定在一个位置 TODO 配置
+                Minion CardMinion = new Minion();
+                CardMinion.Hitpoint = 1000;
+                CardMinion.PlayerId = (int)EPlayerIndex.RealPlayerIndex;
+                CardMinion.Name = "Real Player";
 
-        GameFramework.Instance.BattleLog(CardMinion.Name + " arrived!");
+                Player.PlayerObject = GetTile(0, battleFieldMaxHeight / 2);
+                Player.PlayerObject.GetComponent<BattleFieldTileBehaviour>().Minion = CardMinion;
+                Player.PlayerObject.GetComponentInChildren<TMP_Text>().SetText(CardMinion.Name);
+            }
+            else if (Player.PlayerId == (int)EPlayerIndex.EnemyPlayerIndex)
+            {
+                // 敌人，放到配置的位置，初始化怪
+                Minion CardMinion = new Minion();
+                CardMinion.Attack = MinionConfigItem.Attack;
+                CardMinion.Defense = MinionConfigItem.Defense;
+                CardMinion.Hitpoint = MinionConfigItem.HitPoint;
+                CardMinion.Name = MinionConfigItem.Name;
+                CardMinion.RemainAction = MinionConfigItem.BaseAction;
+                CardMinion.MaxAction = MinionConfigItem.BaseAction;
+                CardMinion.RemainMovement = MinionConfigItem.BaseMovement;
+                CardMinion.MaxMovement = MinionConfigItem.BaseMovement;
+                CardMinion.PlayerId = (int)EPlayerIndex.EnemyPlayerIndex;
+
+                Player.PlayerObject = GetTile(StageConfigItem.TilePosX, StageConfigItem.TilePosY);
+                Player.PlayerObject.GetComponent<BattleFieldTileBehaviour>().Minion = CardMinion;
+                Player.PlayerObject.GetComponentInChildren<TMP_Text>().SetText(CardMinion.Name);
+
+                GameFramework.Instance.BattleLog(CardMinion.Name + " arrived!");
+            }
+        }
+
         foreach (EnemyMinion enemy in StageConfigItem.EnemyMinions)
         {
             Minion minion = new Minion();
@@ -279,7 +295,7 @@ public class BattleFieldBehaviour : MonoSingleton<BattleFieldBehaviour>
         }
 
     }
-    public void AddTile(int PlayerChooseCardX, int PlayerChooseCardY, int PosX, int PosY)
+    public void UseCard(int PlayerChooseCardX, int PlayerChooseCardY, int PosX, int PosY)
     {
         if (PlayerChooseCardX == -1 || PlayerChooseCardY == -1)
         {
@@ -305,10 +321,15 @@ public class BattleFieldBehaviour : MonoSingleton<BattleFieldBehaviour>
 
                 GameFramework.Instance.BattleLog(CardMinion.Name + " arrived!");
             }
-            else
+            else if (CardEffect.EffectType == EffectType.EffectType_Attr)
             {
-                // TODO
+                // 向PosX和PosY的地方的minion，施加属性效果
+
+                // TODO 这个可能之后涉及到合并，因为效果目前只有一份
+                Tile.GetComponent<BattleFieldTileBehaviour>().Minion.AttrEffect = (AttrEffect)CardEffect;
+                Tile.GetComponent<BattleFieldTileBehaviour>().Minion.AddEffect();
             }
+            // TODO
         }
     }
 
